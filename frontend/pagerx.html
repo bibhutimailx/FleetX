@@ -368,15 +368,77 @@
         const API_BASE_URL = 'http://127.0.0.1:8006';
         let allIncidents = [];
 
+        // Mock incident data for demo
+        const mockIncidents = [
+            {
+                incident_id: "INC-2025-001",
+                vehicle_id: "OD-03-NT-1004", 
+                incident_type: "Speed Violation",
+                severity: "critical",
+                description: "Vehicle exceeding 90 km/h limit - Current speed: 105 km/h",
+                timestamp: new Date(Date.now() - 300000).toISOString(),
+                acknowledged: false,
+                location: "NH16 Dhenkanal",
+                driver_name: "Sushant Jena",
+                escalation_level: 1
+            },
+            {
+                incident_id: "INC-2025-002", 
+                vehicle_id: "OD-03-NT-1005",
+                incident_type: "Low Fuel Alert",
+                severity: "high",
+                description: "Critical fuel level detected - 12% remaining",
+                timestamp: new Date(Date.now() - 600000).toISOString(),
+                acknowledged: true,
+                location: "Talcher-Chandilkhol Route",
+                driver_name: "Prakash Mohanty",
+                escalation_level: 2
+            },
+            {
+                incident_id: "INC-2025-003",
+                vehicle_id: "OD-03-NT-1003",
+                incident_type: "Extended Stop",
+                severity: "medium", 
+                description: "Vehicle stopped for 45 minutes without authorization",
+                timestamp: new Date(Date.now() - 900000).toISOString(),
+                acknowledged: false,
+                location: "SH9A Angul",
+                driver_name: "Manoj Behera",
+                escalation_level: 1
+            },
+            {
+                incident_id: "INC-2025-004",
+                vehicle_id: "OD-03-NT-1020",
+                incident_type: "Emergency Stop",
+                severity: "critical",
+                description: "Driver initiated emergency stop - possible breakdown",
+                timestamp: new Date(Date.now() - 180000).toISOString(),
+                acknowledged: false,
+                location: "NH16 Near Parjang",
+                driver_name: "Dinesh Patra",
+                escalation_level: 2
+            }
+        ];
+
         // Initialize the application
         let autoRefreshInterval = null;
         let isAutoRefreshEnabled = false;
         
         document.addEventListener('DOMContentLoaded', function() {
-            loadIncidents();
+            console.log('🚨 PagerX Loading...');
+            loadMockIncidents();
             updateResolvedCount();
             startAutoRefresh();
         });
+
+        // Load mock incidents for demo
+        function loadMockIncidents() {
+            console.log('🚨 Loading mock incidents...');
+            allIncidents = [...mockIncidents];
+            displayIncidents(allIncidents);
+            updateIncidentCounts();
+            console.log(`✅ Loaded ${allIncidents.length} incidents`);
+        }
 
         // Load incidents
         async function loadIncidents() {
@@ -660,8 +722,10 @@
 
         // Update resolved count
         function updateResolvedCount() {
-            // Mock resolved incidents count
-            document.getElementById('resolved-count').textContent = Math.floor(Math.random() * 15) + 5;
+            // Mock resolved incidents count for last 24h
+            const resolvedCount = 19;
+            document.getElementById('resolved-count').textContent = resolvedCount;
+            console.log(`✅ Updated resolved count: ${resolvedCount}`);
         }
 
         // Additional UI functions

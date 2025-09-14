@@ -280,6 +280,76 @@ mock_vehicles = [
         "route_status": "deviation", "stop_duration": 55, "last_movement": (datetime.utcnow() - timedelta(minutes=55)).isoformat(),
         "destination_eta": "2025-09-14T16:45:00", "route_progress": 42, "fuel_level": 38,
         "gate_entry_logged": True, "last_gate_scan": (datetime.utcnow() - timedelta(hours=1, minutes=20)).isoformat()
+    },
+    # Truck 14 - Return journey
+    {
+        "id": 14, "vehicle_id": "OD-03-NT-1014", "driver_name": "Girish Mohanty", "driver_phone": "+91-9437123014",
+        "license_plate": "OD-03-NT-1014", "vehicle_type": "Heavy Truck (Coal)", "capacity_tons": 25,
+        "latitude": 20.9300, "longitude": 85.8400, "speed": 55, "heading": 270,
+        "timestamp": datetime.utcnow().isoformat(), "material_loaded": False, "load_status": "empty",
+        "route_status": "returning", "stop_duration": 0, "last_movement": datetime.utcnow().isoformat(),
+        "destination_eta": "2025-09-14T16:30:00", "route_progress": 20, "fuel_level": 48,
+        "gate_entry_logged": True, "last_gate_scan": (datetime.utcnow() - timedelta(hours=3)).isoformat()
+    },
+    # Truck 15 - Loading at plant
+    {
+        "id": 15, "vehicle_id": "OD-03-NT-1015", "driver_name": "Ashok Pradhan", "driver_phone": "+91-9437123015",
+        "license_plate": "OD-03-NT-1015", "vehicle_type": "Heavy Truck (Coal)", "capacity_tons": 25,
+        "latitude": 20.9600, "longitude": 85.2650, "speed": 0, "heading": 90,
+        "timestamp": datetime.utcnow().isoformat(), "material_loaded": False, "load_status": "loading",
+        "route_status": "loading", "stop_duration": 18, "last_movement": (datetime.utcnow() - timedelta(minutes=18)).isoformat(),
+        "destination_eta": "2025-09-14T17:00:00", "route_progress": 3, "fuel_level": 92,
+        "gate_entry_logged": True, "last_gate_scan": (datetime.utcnow() - timedelta(minutes=25)).isoformat()
+    },
+    # Truck 16 - Normal operation
+    {
+        "id": 16, "vehicle_id": "OD-03-NT-1016", "driver_name": "Rakesh Swain", "driver_phone": "+91-9437123016",
+        "license_plate": "OD-03-NT-1016", "vehicle_type": "Heavy Truck (Coal)", "capacity_tons": 25,
+        "latitude": 20.9750, "longitude": 85.3200, "speed": 62, "heading": 88,
+        "timestamp": datetime.utcnow().isoformat(), "material_loaded": True, "load_status": "loaded",
+        "route_status": "on_route", "stop_duration": 0, "last_movement": datetime.utcnow().isoformat(),
+        "destination_eta": "2025-09-14T15:50:00", "route_progress": 28, "fuel_level": 82,
+        "gate_entry_logged": True, "last_gate_scan": (datetime.utcnow() - timedelta(minutes=35)).isoformat()
+    },
+    # Truck 17 - At toll plaza
+    {
+        "id": 17, "vehicle_id": "OD-03-NT-1017", "driver_name": "Sanjay Mishra", "driver_phone": "+91-9437123017",
+        "license_plate": "OD-03-NT-1017", "vehicle_type": "Heavy Truck (Coal)", "capacity_tons": 25,
+        "latitude": 20.9900, "longitude": 85.5800, "speed": 0, "heading": 85,
+        "timestamp": datetime.utcnow().isoformat(), "material_loaded": True, "load_status": "loaded",
+        "route_status": "toll_payment", "stop_duration": 5, "last_movement": (datetime.utcnow() - timedelta(minutes=5)).isoformat(),
+        "destination_eta": "2025-09-14T15:25:00", "route_progress": 62, "fuel_level": 66,
+        "gate_entry_logged": True, "last_gate_scan": (datetime.utcnow() - timedelta(hours=1, minutes=25)).isoformat()
+    },
+    # Truck 18 - High speed
+    {
+        "id": 18, "vehicle_id": "OD-03-NT-1018", "driver_name": "Bijay Kumar", "driver_phone": "+91-9437123018",
+        "license_plate": "OD-03-NT-1018", "vehicle_type": "Heavy Truck (Coal)", "capacity_tons": 25,
+        "latitude": 20.9800, "longitude": 85.6200, "speed": 92, "heading": 82,
+        "timestamp": datetime.utcnow().isoformat(), "material_loaded": True, "load_status": "loaded",
+        "route_status": "speed_violation", "stop_duration": 0, "last_movement": datetime.utcnow().isoformat(),
+        "destination_eta": "2025-09-14T14:55:00", "route_progress": 72, "fuel_level": 54,
+        "gate_entry_logged": True, "last_gate_scan": (datetime.utcnow() - timedelta(hours=1, minutes=40)).isoformat()
+    },
+    # Truck 19 - Approaching destination
+    {
+        "id": 19, "vehicle_id": "OD-03-NT-1019", "driver_name": "Pradeep Sahoo", "driver_phone": "+91-9437123019",
+        "license_plate": "OD-03-NT-1019", "vehicle_type": "Heavy Truck (Coal)", "capacity_tons": 25,
+        "latitude": 20.8850, "longitude": 86.0600, "speed": 38, "heading": 85,
+        "timestamp": datetime.utcnow().isoformat(), "material_loaded": True, "load_status": "loaded",
+        "route_status": "approaching_destination", "stop_duration": 0, "last_movement": datetime.utcnow().isoformat(),
+        "destination_eta": "2025-09-14T15:05:00", "route_progress": 95, "fuel_level": 42,
+        "gate_entry_logged": True, "last_gate_scan": (datetime.utcnow() - timedelta(hours=2, minutes=15)).isoformat()
+    },
+    # Truck 20 - Emergency stop
+    {
+        "id": 20, "vehicle_id": "OD-03-NT-1020", "driver_name": "Dinesh Patra", "driver_phone": "+91-9437123020",
+        "license_plate": "OD-03-NT-1020", "vehicle_type": "Heavy Truck (Coal)", "capacity_tons": 25,
+        "latitude": 21.0100, "longitude": 85.5100, "speed": 0, "heading": 90,
+        "timestamp": datetime.utcnow().isoformat(), "material_loaded": True, "load_status": "loaded",
+        "route_status": "emergency_stop", "stop_duration": 3, "last_movement": (datetime.utcnow() - timedelta(minutes=3)).isoformat(),
+        "destination_eta": "2025-09-14T15:35:00", "route_progress": 55, "fuel_level": 70,
+        "gate_entry_logged": True, "last_gate_scan": (datetime.utcnow() - timedelta(hours=1, minutes=12)).isoformat()
     }
 ]
 

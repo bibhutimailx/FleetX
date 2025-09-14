@@ -461,7 +461,7 @@
             <div class="bg-white p-6 rounded-lg shadow">
                 <h2 class="text-xl font-bold mb-4 text-gray-700">📋 Real-time Activity Log</h2>
                 <div id="activity-log" class="space-y-2 max-h-64 overflow-y-auto">
-                    <div class="text-center text-gray-500">Loading activity log...</div>
+                    <!-- Activity data will be populated by JavaScript -->
                 </div>
             </div>
 
@@ -469,7 +469,7 @@
             <div class="bg-white p-6 rounded-lg shadow">
                 <h2 class="text-xl font-bold mb-4 text-green-700">⛽ Gas Stations & Fuel Status</h2>
                 <div id="fuel-status" class="space-y-3 max-h-64 overflow-y-auto">
-                    <div class="text-center text-gray-500">Loading fuel data...</div>
+                    <!-- Fuel data will be populated by JavaScript -->
                 </div>
             </div>
         </div>
@@ -478,7 +478,31 @@
 
     <script>
         // Configuration
-        const API_BASE_URL = 'http://127.0.0.1:8006'; // Enhanced API endpoint
+        const API_BASE_URL = 'http://127.0.0.1:8006'; // Enhanced 20-truck API endpoint
+        
+        // 20 Trucks Mock Data - No API Required
+        const mockVehicles = [
+            { vehicle_id: "OD-03-NT-1001", driver_name: "Rajesh Kumar", speed: 65, fuel_level: 85, latitude: 20.9463, longitude: 85.2190, route_status: "on_route", route_progress: 15, material_loaded: true },
+            { vehicle_id: "OD-03-NT-1002", driver_name: "Santosh Patel", speed: 72, fuel_level: 78, latitude: 20.9680, longitude: 85.2890, route_status: "on_route", route_progress: 25, material_loaded: true },
+            { vehicle_id: "OD-03-NT-1003", driver_name: "Manoj Behera", speed: 0, fuel_level: 65, latitude: 20.9950, longitude: 85.4200, route_status: "critical_stop", route_progress: 45, material_loaded: true },
+            { vehicle_id: "OD-03-NT-1004", driver_name: "Sushant Jena", speed: 98, fuel_level: 55, latitude: 21.0500, longitude: 85.5500, route_status: "speed_violation", route_progress: 65, material_loaded: true },
+            { vehicle_id: "OD-03-NT-1005", driver_name: "Prakash Mohanty", speed: 55, fuel_level: 12, latitude: 20.9200, longitude: 85.8900, route_status: "low_fuel", route_progress: 82, material_loaded: true },
+            { vehicle_id: "OD-03-NT-1006", driver_name: "Deepak Singh", speed: 45, fuel_level: 68, latitude: 20.8800, longitude: 86.0500, route_status: "route_deviation", route_progress: 92, material_loaded: true },
+            { vehicle_id: "OD-03-NT-1007", driver_name: "Ravi Mishra", speed: 0, fuel_level: 45, latitude: 20.8739, longitude: 86.0891, route_status: "unloading", route_progress: 100, material_loaded: false },
+            { vehicle_id: "OD-03-NT-1008", driver_name: "Anil Kumar", speed: 0, fuel_level: 92, latitude: 20.9600, longitude: 85.2650, route_status: "loading", route_progress: 2, material_loaded: false },
+            { vehicle_id: "OD-03-NT-1009", driver_name: "Suresh Panda", speed: 68, fuel_level: 58, latitude: 20.9500, longitude: 85.7800, route_status: "on_route", route_progress: 75, material_loaded: true },
+            { vehicle_id: "OD-03-NT-1010", driver_name: "Biswa Nath", speed: 0, fuel_level: 35, latitude: 21.0050, longitude: 85.4800, route_status: "refueling", route_progress: 52, material_loaded: true },
+            { vehicle_id: "OD-03-NT-1011", driver_name: "Kailash Das", speed: 42, fuel_level: 88, latitude: 20.9520, longitude: 85.2380, route_status: "on_route", route_progress: 12, material_loaded: true },
+            { vehicle_id: "OD-03-NT-1012", driver_name: "Ramesh Sahoo", speed: 88, fuel_level: 72, latitude: 20.9850, longitude: 85.3450, route_status: "high_speed", route_progress: 35, material_loaded: true },
+            { vehicle_id: "OD-03-NT-1013", driver_name: "Subash Jena", speed: 0, fuel_level: 62, latitude: 21.0250, longitude: 85.4850, route_status: "extended_stop", route_progress: 58, material_loaded: true },
+            { vehicle_id: "OD-03-NT-1014", driver_name: "Girish Mohanty", speed: 55, fuel_level: 48, latitude: 20.9300, longitude: 85.8400, route_status: "returning", route_progress: 20, material_loaded: false },
+            { vehicle_id: "OD-03-NT-1015", driver_name: "Ashok Pradhan", speed: 0, fuel_level: 92, latitude: 20.9600, longitude: 85.2650, route_status: "loading", route_progress: 3, material_loaded: false },
+            { vehicle_id: "OD-03-NT-1016", driver_name: "Rakesh Swain", speed: 62, fuel_level: 82, latitude: 20.9750, longitude: 85.3200, route_status: "on_route", route_progress: 28, material_loaded: true },
+            { vehicle_id: "OD-03-NT-1017", driver_name: "Sanjay Mishra", speed: 0, fuel_level: 66, latitude: 20.9900, longitude: 85.5800, route_status: "toll_payment", route_progress: 62, material_loaded: true },
+            { vehicle_id: "OD-03-NT-1018", driver_name: "Bijay Kumar", speed: 105, fuel_level: 54, latitude: 20.9800, longitude: 85.6200, route_status: "critical_speed", route_progress: 72, material_loaded: true },
+            { vehicle_id: "OD-03-NT-1019", driver_name: "Pradeep Sahoo", speed: 38, fuel_level: 42, latitude: 20.8850, longitude: 86.0600, route_status: "approaching_destination", route_progress: 95, material_loaded: true },
+            { vehicle_id: "OD-03-NT-1020", driver_name: "Dinesh Patra", speed: 0, fuel_level: 70, latitude: 21.0100, longitude: 85.5100, route_status: "emergency_stop", route_progress: 55, material_loaded: true }
+        ];
         
         // Global variables
         let map;
@@ -491,12 +515,793 @@
         let gasStationMarkers = [];
         let tollGateMarkers = [];
 
-        // Initialize the application
+        // Initialize the application with cache busting
         document.addEventListener('DOMContentLoaded', function() {
-            initializeMap();
-            loadData();
-            setInterval(refreshData, 8000); // Refresh every 8 seconds as required
+            console.log('🚛 FleetX Loading... Timestamp:', new Date().toISOString());
+            
+            // Force clear any cached content
+            const elements = ['activity-log', 'fuel-status', 'gate-entries'];
+            elements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = '<div class="text-center text-gray-500 py-2">Initializing...</div>';
+            });
+            
+            setTimeout(() => {
+                initializeMap();
+                loadMockData(); // Use mock data instead of API
+                setInterval(refreshMockData, 8000); // Refresh every 8 seconds as required
+            }, 100);
         });
+
+        // Load mock data function for 20-truck demo
+        function loadMockData() {
+            console.log('🚛 Loading 20-truck fleet demo...');
+            
+            // Set vehicles
+            currentVehicles = [...mockVehicles];
+            console.log('🚛 Current vehicles set:', currentVehicles.length);
+            
+            // Mock additional data with complete gas station info
+            gasStations = [
+                { 
+                    id: "HP_TALCHER", 
+                    name: "HP Petrol Pump", 
+                    brand: "Hindustan Petroleum",
+                    latitude: 20.9500, 
+                    longitude: 85.2300,
+                    services: ["Petrol", "Diesel", "CNG", "ATM", "Restroom"]
+                },
+                { 
+                    id: "IOC_BOINDA", 
+                    name: "Indian Oil Station", 
+                    brand: "Indian Oil Corporation",
+                    latitude: 20.9720, 
+                    longitude: 85.2950,
+                    services: ["Petrol", "Diesel", "Lubricants", "Convenience Store"]
+                },
+                { 
+                    id: "BPCL_DHENKANAL", 
+                    name: "BPCL Fuel Station", 
+                    brand: "Bharat Petroleum",
+                    latitude: 20.9900, 
+                    longitude: 85.4100,
+                    services: ["Petrol", "Diesel", "Speed Mart", "ATM"]
+                }
+            ];
+            
+            tollGates = [
+                { id: "DHENKANAL_TOLL", name: "Dhenkanal Toll Plaza", latitude: 20.9930, longitude: 85.4300 },
+                { id: "PARJANG_TOLL", name: "Parjang Toll Plaza", latitude: 20.9850, longitude: 85.6300 }
+            ];
+
+            // Force populate sections with debugging
+            console.log('🔄 Updating dashboard...');
+            updateDashboard();
+            
+            console.log('🔄 Updating activity log...');
+            forceUpdateActivityLog();
+            
+            console.log('🔄 Updating fuel status...');
+            forceUpdateFuelStatus();
+            
+            console.log('🔄 Updating gate entries...');
+            forceUpdateGateEntries();
+            
+            updateVehicleList();
+            updateMap(currentVehicles);
+            
+            console.log(`✅ Loaded ${currentVehicles.length} trucks successfully`);
+        }
+
+        // Force update functions with direct DOM manipulation
+        function forceUpdateActivityLog() {
+            const activityEl = document.getElementById('activity-log');
+            if (!activityEl) {
+                console.log('❌ Activity log element not found');
+                return;
+            }
+            
+            // Create sample activities directly from mock data
+            const activities = [
+                `<div class="activity-item p-3 border-l-4 border-red-500 bg-white mb-2 rounded-r shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-lg">🚨</span>
+                                <span class="font-medium text-gray-800">OD-03-NT-1004</span>
+                                <span class="text-xs px-2 py-1 rounded bg-red-100 text-red-800">CRITICAL</span>
+                            </div>
+                            <p class="text-sm text-gray-600">⚠️ Speed violation: 98 km/h (Driver: Sushant Jena)</p>
+                        </div>
+                        <span class="text-xs text-gray-400 ml-2">${new Date().toLocaleTimeString()}</span>
+                    </div>
+                </div>`,
+                `<div class="activity-item p-3 border-l-4 border-orange-500 bg-white mb-2 rounded-r shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-lg">⛽</span>
+                                <span class="font-medium text-gray-800">OD-03-NT-1005</span>
+                                <span class="text-xs px-2 py-1 rounded bg-orange-100 text-orange-800">WARNING</span>
+                            </div>
+                            <p class="text-sm text-gray-600">⛽ Low fuel alert: 12% remaining</p>
+                        </div>
+                        <span class="text-xs text-gray-400 ml-2">${new Date().toLocaleTimeString()}</span>
+                    </div>
+                </div>`,
+                `<div class="activity-item p-3 border-l-4 border-blue-500 bg-white mb-2 rounded-r shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-lg">📦</span>
+                                <span class="font-medium text-gray-800">OD-03-NT-1008</span>
+                                <span class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-800">INFO</span>
+                            </div>
+                            <p class="text-sm text-gray-600">📦 Loading coal at NTPC plant</p>
+                        </div>
+                        <span class="text-xs text-gray-400 ml-2">${new Date().toLocaleTimeString()}</span>
+                    </div>
+                </div>`
+            ];
+            
+            activityEl.innerHTML = activities.join('');
+            console.log('✅ Activity log populated with', activities.length, 'items');
+        }
+
+        function forceUpdateFuelStatus() {
+            const fuelEl = document.getElementById('fuel-status');
+            if (!fuelEl) {
+                console.log('❌ Fuel status element not found');
+                return;
+            }
+            
+            const fuelContent = `
+                <div class="space-y-4">
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-yellow-800 mb-2">⚠️ Low Fuel Alerts (2)</h4>
+                        <div class="flex justify-between items-center py-1">
+                            <span class="text-sm">OD-03-NT-1005</span>
+                            <span class="text-sm font-medium text-yellow-700">12%</span>
+                        </div>
+                        <div class="flex justify-between items-center py-1">
+                            <span class="text-sm">OD-03-NT-1019</span>
+                            <span class="text-sm font-medium text-yellow-700">42%</span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-semibold mb-3">⛽ Nearby Gas Stations</h4>
+                        <div class="gas-station-card bg-white border rounded-lg p-3 mb-2">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h5 class="font-medium">HP Petrol Pump</h5>
+                                    <p class="text-sm text-gray-600">Price: ₹${(94 + Math.random() * 4).toFixed(2)}/L</p>
+                                    <p class="text-xs text-gray-500">2 truck(s) nearby</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded bg-green-100 text-green-800">ACTIVE</span>
+                            </div>
+                        </div>
+                        <div class="gas-station-card bg-white border rounded-lg p-3 mb-2">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h5 class="font-medium">Indian Oil Station</h5>
+                                    <p class="text-sm text-gray-600">Price: ₹${(96 + Math.random() * 4).toFixed(2)}/L</p>
+                                    <p class="text-xs text-gray-500">1 truck(s) nearby</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded bg-green-100 text-green-800">ACTIVE</span>
+                            </div>
+                        </div>
+                        <div class="gas-station-card bg-white border rounded-lg p-3 mb-2">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h5 class="font-medium">BPCL Fuel Station</h5>
+                                    <p class="text-sm text-gray-600">Price: ₹${(93 + Math.random() * 4).toFixed(2)}/L</p>
+                                    <p class="text-xs text-gray-500">0 truck(s) nearby</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded bg-gray-100 text-gray-600">AVAILABLE</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            fuelEl.innerHTML = fuelContent;
+            console.log('✅ Fuel status populated');
+        }
+
+        function forceUpdateGateEntries() {
+            const gateEl = document.getElementById('gate-entries');
+            if (!gateEl) {
+                console.log('❌ Gate entries element not found');
+                return;
+            }
+            
+            const gateContent = `
+                <div class="border border-green-200 bg-green-50 rounded p-3 mb-2">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-medium">OD-03-NT-1008</span>
+                                <span class="text-xs px-2 py-1 rounded bg-green-100 text-green-800">ENTRY</span>
+                            </div>
+                            <p class="text-sm text-gray-600">Driver: Anil Kumar</p>
+                            <p class="text-sm text-gray-600">NTPC Talcher Plant</p>
+                            <p class="text-xs text-gray-500">Weight: Empty | Status: VERIFIED</p>
+                        </div>
+                        <span class="text-xs text-gray-400">${new Date().toLocaleTimeString()}</span>
+                    </div>
+                </div>
+                <div class="border border-blue-200 bg-blue-50 rounded p-3 mb-2">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-medium">OD-03-NT-1007</span>
+                                <span class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-800">EXIT</span>
+                            </div>
+                            <p class="text-sm text-gray-600">Driver: Ravi Mishra</p>
+                            <p class="text-sm text-gray-600">Coal Delivery Point</p>
+                            <p class="text-xs text-gray-500">Weight: 25 tons | Status: VERIFIED</p>
+                        </div>
+                        <span class="text-xs text-gray-400">${new Date(Date.now() - 300000).toLocaleTimeString()}</span>
+                    </div>
+                </div>
+                <div class="border border-green-200 bg-green-50 rounded p-3 mb-2">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-medium">OD-03-NT-1015</span>
+                                <span class="text-xs px-2 py-1 rounded bg-green-100 text-green-800">ENTRY</span>
+                            </div>
+                            <p class="text-sm text-gray-600">Driver: Ashok Pradhan</p>
+                            <p class="text-sm text-gray-600">NTPC Talcher Plant</p>
+                            <p class="text-xs text-gray-500">Weight: Empty | Status: VERIFIED</p>
+                        </div>
+                        <span class="text-xs text-gray-400">${new Date(Date.now() - 600000).toLocaleTimeString()}</span>
+                    </div>
+                </div>
+            `;
+            
+            gateEl.innerHTML = gateContent;
+            console.log('✅ Gate entries populated');
+        }
+
+        // Refresh mock data with simulation
+        function refreshMockData() {
+            simulateVehicleMovement();
+            updateDashboard();
+            updateVehicleList();
+            updateMap(currentVehicles);
+            updateGateEntries();
+            updateActivityLog();
+            updateFuelStatus();
+        }
+
+        // Simulate realistic vehicle movement with dynamic events
+        function simulateVehicleMovement() {
+            currentVehicles.forEach((vehicle, index) => {
+                vehicle.timestamp = new Date().toISOString();
+                
+                // Random event generator (5% chance per refresh)
+                if (Math.random() < 0.05) {
+                    generateRandomEvent(vehicle);
+                }
+                
+                // Speed variations based on status
+                if (vehicle.route_status === "on_route") {
+                    vehicle.speed += (Math.random() - 0.5) * 10;
+                    vehicle.speed = Math.max(35, Math.min(85, vehicle.speed));
+                    
+                    // Random speed violations
+                    if (Math.random() < 0.02 && vehicle.speed < 95) {
+                        vehicle.speed = 95 + Math.random() * 15;
+                        vehicle.route_status = 'speed_violation';
+                    }
+                } else if (vehicle.route_status === 'speed_violation') {
+                    // Gradually reduce speed
+                    vehicle.speed = Math.max(60, vehicle.speed - 5);
+                    if (vehicle.speed <= 75) {
+                        vehicle.route_status = 'on_route';
+                    }
+                }
+                
+                // Fuel consumption based on speed and load
+                if (vehicle.speed > 0) {
+                    const baseConsumption = 0.1;
+                    const speedFactor = vehicle.speed / 100;
+                    const loadFactor = vehicle.material_loaded ? 1.3 : 1.0;
+                    vehicle.fuel_level -= baseConsumption * speedFactor * loadFactor;
+                    vehicle.fuel_level = Math.max(5, vehicle.fuel_level);
+                    
+                    // Auto-refuel when very low
+                    if (vehicle.fuel_level <= 15 && Math.random() < 0.3) {
+                        vehicle.route_status = 'refueling';
+                        vehicle.speed = 0;
+                    }
+                }
+                
+                // Refueling process
+                if (vehicle.route_status === 'refueling') {
+                    vehicle.fuel_level += 2;
+                    if (vehicle.fuel_level >= 85) {
+                        vehicle.route_status = 'on_route';
+                        vehicle.fuel_level = Math.min(100, vehicle.fuel_level);
+                    }
+                }
+                
+                // Route progress updates
+                if (vehicle.speed > 0 && vehicle.route_status === 'on_route') {
+                    vehicle.route_progress += Math.random() * 2;
+                    vehicle.route_progress = Math.min(100, vehicle.route_progress);
+                    
+                    // Approaching destination
+                    if (vehicle.route_progress >= 95 && vehicle.material_loaded) {
+                        vehicle.route_status = 'approaching_destination';
+                        vehicle.speed = Math.max(25, vehicle.speed - 10);
+                    }
+                    
+                    // Start unloading
+                    if (vehicle.route_progress >= 100 && vehicle.material_loaded) {
+                        vehicle.route_status = 'unloading';
+                        vehicle.speed = 0;
+                        vehicle.route_progress = 100;
+                    }
+                }
+                
+                // Unloading process
+                if (vehicle.route_status === 'unloading') {
+                    if (Math.random() < 0.2) {
+                        vehicle.material_loaded = false;
+                        vehicle.route_status = 'returning';
+                        vehicle.route_progress = 0;
+                        vehicle.speed = 45;
+                    }
+                }
+                
+                // Loading process
+                if (vehicle.route_status === 'loading') {
+                    if (Math.random() < 0.15) {
+                        vehicle.material_loaded = true;
+                        vehicle.route_status = 'on_route';
+                        vehicle.route_progress = 5;
+                        vehicle.speed = 50;
+                    }
+                }
+                
+                // Return journey
+                if (vehicle.route_status === 'returning') {
+                    vehicle.route_progress += Math.random() * 3;
+                    vehicle.speed = 45 + Math.random() * 20;
+                    
+                    if (vehicle.route_progress >= 100) {
+                        vehicle.route_status = 'loading';
+                        vehicle.speed = 0;
+                        vehicle.route_progress = 0;
+                    }
+                }
+                
+                // Position updates along route
+                if (vehicle.speed > 0) {
+                    const moveDistance = (vehicle.speed / 100000) * (Math.random() * 0.5 + 0.5);
+                    vehicle.latitude += (Math.random() - 0.5) * moveDistance;
+                    vehicle.longitude += moveDistance * (vehicle.material_loaded ? 1 : -1);
+                    
+                    // Keep within Odisha bounds
+                    vehicle.latitude = Math.max(20.8, Math.min(21.1, vehicle.latitude));
+                    vehicle.longitude = Math.max(85.2, Math.min(86.1, vehicle.longitude));
+                }
+            });
+        }
+
+        // Generate random events for realistic simulation
+        function generateRandomEvent(vehicle) {
+            const events = [
+                () => { 
+                    if (vehicle.route_status === 'on_route') {
+                        vehicle.route_status = 'critical_stop';
+                        vehicle.speed = 0;
+                    }
+                },
+                () => {
+                    if (vehicle.route_status !== 'refueling') {
+                        vehicle.fuel_level = Math.max(5, vehicle.fuel_level - 10);
+                    }
+                },
+                () => {
+                    if (vehicle.route_status === 'on_route') {
+                        vehicle.route_status = 'toll_payment';
+                        vehicle.speed = 0;
+                        setTimeout(() => {
+                            if (vehicle.route_status === 'toll_payment') {
+                                vehicle.route_status = 'on_route';
+                                vehicle.speed = 55;
+                            }
+                        }, 10000);
+                    }
+                }
+            ];
+            
+            const randomEvent = events[Math.floor(Math.random() * events.length)];
+            randomEvent();
+        }
+
+        // Update dashboard with current truck statistics
+        function updateDashboard() {
+            const totalTrucks = currentVehicles.length;
+            const activeTrucks = currentVehicles.filter(v => v.speed > 0).length;
+            const stoppedTrucks = currentVehicles.filter(v => v.speed === 0).length;
+            const criticalAlerts = currentVehicles.filter(v => 
+                v.route_status.includes('critical') || 
+                v.route_status === 'speed_violation' || 
+                v.fuel_level < 20
+            ).length;
+            const speedViolations = currentVehicles.filter(v => 
+                v.route_status === 'speed_violation' || v.route_status === 'critical_speed'
+            ).length;
+            const lowFuelTrucks = currentVehicles.filter(v => v.fuel_level < 30).length;
+            const avgFuel = Math.round(currentVehicles.reduce((sum, v) => sum + v.fuel_level, 0) / totalTrucks);
+            const avgProgress = Math.round(currentVehicles.reduce((sum, v) => sum + v.route_progress, 0) / totalTrucks);
+            
+            // Update all dashboard elements with correct IDs
+            updateElement('vehicles-count', `<i class="fas fa-truck mr-1"></i>${totalTrucks} Trucks`);
+            updateElement('total-vehicles', totalTrucks);
+            updateElement('vehicles-on-route', activeTrucks);
+            updateElement('vehicles-stopped', stoppedTrucks);
+            updateElement('critical-alerts', criticalAlerts);
+            updateElement('speed-violations', speedViolations);
+            updateElement('low-fuel-vehicles', lowFuelTrucks);
+            updateElement('avg-fuel-level', `${avgFuel}%`);
+            updateElement('avg-route-progress', `${avgProgress}%`);
+            updateElement('last-update', `Updated: ${new Date().toLocaleTimeString()}`);
+            updateElement('system-last-update', new Date().toLocaleTimeString());
+            
+            // Update progress bars if they exist
+            updateProgressBar('fuel-progress-bar', avgFuel);
+            updateProgressBar('route-progress-bar', avgProgress);
+        }
+
+        function updateElement(id, value) {
+            const element = document.getElementById(id);
+            if (element) {
+                if (typeof value === 'string' && value.includes('<')) {
+                    element.innerHTML = value;
+                } else {
+                    element.textContent = value;
+                }
+            }
+        }
+
+        function updateProgressBar(id, percentage) {
+            const progressBar = document.getElementById(id);
+            if (progressBar) {
+                progressBar.style.width = `${percentage}%`;
+                progressBar.setAttribute('aria-valuenow', percentage);
+            }
+        }
+
+        // Update vehicle list display
+        function updateVehicleList() {
+            const vehicleListEl = document.getElementById('vehicle-list');
+            if (!vehicleListEl) return;
+            
+            vehicleListEl.innerHTML = currentVehicles.map(vehicle => `
+                <div class="vehicle-card bg-white p-4 rounded border ${getVehicleStatusColor(vehicle.route_status)}" 
+                     onclick="focusOnVehicle('${vehicle.vehicle_id}')">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-semibold text-lg">${vehicle.vehicle_id}</h3>
+                        <span class="text-sm ${getStatusBadgeColor(vehicle.route_status)} px-2 py-1 rounded">
+                            ${vehicle.route_status.replace('_', ' ').toUpperCase()}
+                        </span>
+                    </div>
+                    <p class="text-gray-600 mb-1">Driver: ${vehicle.driver_name}</p>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>Speed: ${vehicle.speed} km/h</div>
+                        <div>Fuel: ${vehicle.fuel_level}%</div>
+                        <div>Progress: ${vehicle.route_progress}%</div>
+                        <div>Load: ${vehicle.material_loaded ? 'Loaded' : 'Empty'}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update activity log with real-time events
+        function updateActivityLog() {
+            const activityEl = document.getElementById('activity-log');
+            const activityListEl = document.getElementById('activity-list');
+            const targetEl = activityEl || activityListEl;
+            
+            if (!targetEl) return;
+            
+            // Generate real-time activities from current vehicles
+            const activities = [];
+            
+            currentVehicles.forEach(vehicle => {
+                // Add various types of activities based on vehicle status
+                if (vehicle.route_status === 'speed_violation' || vehicle.route_status === 'critical_speed') {
+                    activities.push({
+                        time: new Date().toLocaleTimeString(),
+                        vehicle: vehicle.vehicle_id,
+                        driver: vehicle.driver_name,
+                        message: `⚠️ Speed violation: ${vehicle.speed} km/h (Driver: ${vehicle.driver_name})`,
+                        type: 'critical',
+                        icon: '🚨'
+                    });
+                }
+                
+                if (vehicle.fuel_level < 20) {
+                    activities.push({
+                        time: new Date().toLocaleTimeString(),
+                        vehicle: vehicle.vehicle_id,
+                        driver: vehicle.driver_name,
+                        message: `⛽ Low fuel alert: ${vehicle.fuel_level}% remaining`,
+                        type: 'warning',
+                        icon: '⛽'
+                    });
+                }
+                
+                if (vehicle.route_status === 'critical_stop' || vehicle.route_status === 'emergency_stop') {
+                    activities.push({
+                        time: new Date().toLocaleTimeString(),
+                        vehicle: vehicle.vehicle_id,
+                        driver: vehicle.driver_name,
+                        message: `🛑 Emergency stop detected - No movement`,
+                        type: 'critical',
+                        icon: '🛑'
+                    });
+                }
+                
+                if (vehicle.route_status === 'loading') {
+                    activities.push({
+                        time: new Date().toLocaleTimeString(),
+                        vehicle: vehicle.vehicle_id,
+                        driver: vehicle.driver_name,
+                        message: `📦 Loading coal at NTPC plant`,
+                        type: 'info',
+                        icon: '📦'
+                    });
+                }
+                
+                if (vehicle.route_status === 'unloading') {
+                    activities.push({
+                        time: new Date().toLocaleTimeString(),
+                        vehicle: vehicle.vehicle_id,
+                        driver: vehicle.driver_name,
+                        message: `🏭 Unloading at destination (${vehicle.route_progress}% complete)`,
+                        type: 'info',
+                        icon: '🏭'
+                    });
+                }
+            });
+            
+            // Sort by type priority and take top 15
+            const sortedActivities = activities
+                .sort((a, b) => {
+                    const priority = { critical: 3, warning: 2, info: 1 };
+                    return priority[b.type] - priority[a.type];
+                })
+                .slice(0, 15);
+            
+            if (sortedActivities.length === 0) {
+                targetEl.innerHTML = `
+                    <div class="text-center py-4 text-gray-500">
+                        <i class="fas fa-check-circle text-green-500 text-2xl mb-2"></i>
+                        <p>All vehicles operating normally</p>
+                        <p class="text-sm">Last updated: ${new Date().toLocaleTimeString()}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            targetEl.innerHTML = sortedActivities.map(activity => `
+                <div class="activity-item p-3 border-l-4 ${getActivityColor(activity.type)} bg-white mb-2 rounded-r shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-lg">${activity.icon}</span>
+                                <span class="font-medium text-gray-800">${activity.vehicle}</span>
+                                <span class="text-xs px-2 py-1 rounded ${getActivityBadgeColor(activity.type)}">
+                                    ${activity.type.toUpperCase()}
+                                </span>
+                            </div>
+                            <p class="text-sm text-gray-600">${activity.message}</p>
+                        </div>
+                        <span class="text-xs text-gray-400 ml-2">${activity.time}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update fuel status with gas stations
+        function updateFuelStatus() {
+            const fuelStatusEl = document.getElementById('fuel-status');
+            const gasStationListEl = document.getElementById('gas-station-list');
+            const targetEl = fuelStatusEl || gasStationListEl;
+            
+            if (!targetEl) return;
+            
+            // Generate fuel-related activities
+            const fuelData = gasStations.map(station => {
+                const nearbyTrucks = currentVehicles.filter(v => {
+                    const distance = Math.sqrt(
+                        Math.pow(v.latitude - station.latitude, 2) + 
+                        Math.pow(v.longitude - station.longitude, 2)
+                    );
+                    return distance < 0.05; // Within ~5km
+                });
+                
+                return {
+                    ...station,
+                    nearbyTrucks: nearbyTrucks.length,
+                    status: nearbyTrucks.length > 0 ? 'active' : 'available',
+                    fuelPrice: (92 + Math.random() * 8).toFixed(2)
+                };
+            });
+            
+            const lowFuelTrucks = currentVehicles.filter(v => v.fuel_level < 30);
+            
+            targetEl.innerHTML = `
+                <div class="space-y-4">
+                    ${lowFuelTrucks.length > 0 ? `
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-yellow-800 mb-2">⚠️ Low Fuel Alerts (${lowFuelTrucks.length})</h4>
+                        ${lowFuelTrucks.map(truck => `
+                            <div class="flex justify-between items-center py-1">
+                                <span class="text-sm">${truck.vehicle_id}</span>
+                                <span class="text-sm font-medium text-yellow-700">${truck.fuel_level}%</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ` : ''}
+                    
+                    <div>
+                        <h4 class="font-semibold mb-3">⛽ Nearby Gas Stations</h4>
+                        ${fuelData.map(station => `
+                            <div class="gas-station-card bg-white border rounded-lg p-3 mb-2">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h5 class="font-medium">${station.name}</h5>
+                                        <p class="text-sm text-gray-600">Price: ₹${station.fuelPrice}/L</p>
+                                        <p class="text-xs text-gray-500">
+                                            ${station.nearbyTrucks} truck(s) nearby
+                                        </p>
+                                    </div>
+                                    <span class="text-xs px-2 py-1 rounded ${
+                                        station.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                                    }">
+                                        ${station.status.toUpperCase()}
+                                    </span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Update gate entries display with real data
+        function updateGateEntries() {
+            const gateDiv = document.getElementById('gate-entries');
+            if (!gateDiv) return;
+            
+            // Generate gate entries from current vehicle data
+            const recentEntries = currentVehicles
+                .filter(v => v.route_status === 'loading' || v.route_status === 'unloading' || Math.random() < 0.3)
+                .slice(0, 8)
+                .map(vehicle => {
+                    const entryTime = new Date(Date.now() - Math.random() * 3600000); // Within last hour
+                    const isEntry = Math.random() > 0.5;
+                    return {
+                        vehicle_id: vehicle.vehicle_id,
+                        driver_name: vehicle.driver_name,
+                        gate_type: isEntry ? 'ENTRY' : 'EXIT',
+                        timestamp: entryTime.toLocaleTimeString(),
+                        location: isEntry ? 'NTPC Talcher Plant' : 'Coal Delivery Point',
+                        weight: vehicle.material_loaded ? `${20 + Math.floor(Math.random() * 10)} tons` : 'Empty',
+                        status: 'VERIFIED'
+                    };
+                });
+            
+            if (recentEntries.length === 0) {
+                gateDiv.innerHTML = '<div class="text-center text-gray-500 py-4">No recent gate entries</div>';
+                return;
+            }
+
+            gateDiv.innerHTML = recentEntries.map(entry => `
+                <div class="border ${entry.gate_type === 'ENTRY' ? 'border-green-200 bg-green-50' : 'border-blue-200 bg-blue-50'} rounded p-3 mb-2">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-medium">${entry.vehicle_id}</span>
+                                <span class="text-xs px-2 py-1 rounded ${entry.gate_type === 'ENTRY' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">
+                                    ${entry.gate_type}
+                                </span>
+                            </div>
+                            <p class="text-sm text-gray-600">Driver: ${entry.driver_name}</p>
+                            <p class="text-sm text-gray-600">${entry.location}</p>
+                            <p class="text-xs text-gray-500">Weight: ${entry.weight} | Status: ${entry.status}</p>
+                        </div>
+                        <span class="text-xs text-gray-400">${entry.timestamp}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Helper functions
+        function getVehicleStatusColor(status) {
+            const colors = {
+                'critical_stop': 'border-red-500',
+                'speed_violation': 'border-orange-500',
+                'critical_speed': 'border-red-500',
+                'low_fuel': 'border-yellow-500',
+                'route_deviation': 'border-purple-500',
+                'emergency_stop': 'border-red-600',
+                'on_route': 'border-green-500',
+                'loading': 'border-blue-500',
+                'unloading': 'border-blue-500'
+            };
+            return colors[status] || 'border-gray-300';
+        }
+
+        function getStatusBadgeColor(status) {
+            const colors = {
+                'critical_stop': 'bg-red-100 text-red-800',
+                'speed_violation': 'bg-orange-100 text-orange-800',
+                'critical_speed': 'bg-red-100 text-red-800',
+                'low_fuel': 'bg-yellow-100 text-yellow-800',
+                'route_deviation': 'bg-purple-100 text-purple-800',
+                'emergency_stop': 'bg-red-100 text-red-800',
+                'on_route': 'bg-green-100 text-green-800',
+                'loading': 'bg-blue-100 text-blue-800',
+                'unloading': 'bg-blue-100 text-blue-800'
+            };
+            return colors[status] || 'bg-gray-100 text-gray-800';
+        }
+
+        function getActivityMessage(vehicle) {
+            const messages = {
+                'critical_stop': `Critical stop detected - no movement for extended period`,
+                'speed_violation': `Speed violation detected - ${vehicle.speed} km/h`,
+                'critical_speed': `Critical speed violation - ${vehicle.speed} km/h`,
+                'low_fuel': `Low fuel alert - ${vehicle.fuel_level}% remaining`,
+                'route_deviation': `Route deviation detected`,
+                'emergency_stop': `Emergency stop initiated`,
+                'loading': `Loading materials at plant`,
+                'unloading': `Unloading at destination`,
+                'refueling': `Refueling in progress`
+            };
+            return messages[vehicle.route_status] || `Status: ${vehicle.route_status}`;
+        }
+
+        function getActivityType(status) {
+            const types = {
+                'critical_stop': 'critical',
+                'speed_violation': 'warning',
+                'critical_speed': 'critical',
+                'low_fuel': 'warning',
+                'route_deviation': 'warning',
+                'emergency_stop': 'critical',
+                'loading': 'info',
+                'unloading': 'info'
+            };
+            return types[status] || 'info';
+        }
+
+        function getActivityColor(type) {
+            const colors = {
+                'critical': 'border-red-500',
+                'warning': 'border-orange-500',
+                'info': 'border-blue-500'
+            };
+            return colors[type] || 'border-gray-500';
+        }
+
+        function getActivityBadgeColor(type) {
+            const colors = {
+                'critical': 'bg-red-100 text-red-800',
+                'warning': 'bg-orange-100 text-orange-800',
+                'info': 'bg-blue-100 text-blue-800'
+            };
+            return colors[type] || 'bg-gray-100 text-gray-800';
+        }
 
         // Initialize map with NTPC route
         function initializeMap() {
@@ -842,13 +1647,22 @@
         }
 
         function toggleGasStations() {
+            console.log('🔧 Toggle Gas Stations clicked');
+            console.log('📍 Available gas stations:', gasStations.length);
+            console.log('🗺️ Current gas station markers:', gasStationMarkers.length);
+            
             if (gasStationMarkers.length > 0) {
+                // Remove existing markers
                 gasStationMarkers.forEach(marker => map.removeLayer(marker));
                 gasStationMarkers = [];
                 document.getElementById('gas-stations-btn').classList.remove('bg-green-800');
                 document.getElementById('gas-stations-btn').classList.add('bg-green-600');
+                console.log('✅ Gas stations hidden');
             } else {
-                gasStations.forEach(station => {
+                // Add gas station markers
+                gasStations.forEach((station, index) => {
+                    console.log(`📍 Adding gas station ${index + 1}: ${station.name} at [${station.latitude}, ${station.longitude}]`);
+                    
                     const marker = L.marker([station.latitude, station.longitude], {
                         icon: L.divIcon({
                             html: '<div class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold"><i class="fas fa-gas-pump"></i></div>',
@@ -863,12 +1677,17 @@
                             <div class="text-xs text-gray-500 mt-1">
                                 Services: ${station.services.join(', ')}
                             </div>
+                            <div class="text-xs text-blue-600 mt-2">
+                                📍 Location: ${station.latitude.toFixed(4)}, ${station.longitude.toFixed(4)}
+                            </div>
                         </div>
                     `).addTo(map);
                     gasStationMarkers.push(marker);
                 });
+                
                 document.getElementById('gas-stations-btn').classList.remove('bg-green-600');
                 document.getElementById('gas-stations-btn').classList.add('bg-green-800');
+                console.log(`✅ ${gasStations.length} gas stations displayed on map`);
             }
         }
 
