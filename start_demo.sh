@@ -48,7 +48,7 @@ trap cleanup SIGINT SIGTERM
 echo ""
 echo "🚀 Starting FleetX Enhanced India Backend API on port 8006..."
 cd backend
-python enhanced_india_fleet_api.py &
+python3 enhanced_india_fleet_api.py &
 BACKEND_PID=$!
 cd ..
 
@@ -67,7 +67,7 @@ fi
 echo ""
 echo "🌐 Starting FleetX Enhanced India Frontend on port 3004..."
 cd frontend
-python serve_enhanced_india.py &
+python3 serve_enhanced_india.py &
 FRONTEND_PID=$!
 cd ..
 
