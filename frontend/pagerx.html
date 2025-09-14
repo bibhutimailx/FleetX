@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚨 PagerX - Critical Incident Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        .incident-card {
+            transition: all 0.3s ease;
+        }
+        .incident-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .critical-pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="bg-white rounded-full p-2 mr-3">
+                        <i class="fas fa-pager text-indigo-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">📟 PagerX - Incident Command Center</h1>
+                        <p class="text-sm opacity-90">Real-time Incident Management & Response Coordination</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="flex items-center space-x-2">
+                        <button onclick="createNewIncident()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
+                            <i class="fas fa-plus mr-1"></i> New Incident
+                        </button>
+                        <button onclick="openMobileDemo()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                            <i class="fas fa-mobile-alt mr-1"></i> Mobile Demo
+                        </button>
+                        <button onclick="sendMobileDemo()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">
+                            <i class="fas fa-bell mr-1"></i> Send Alert
+                        </button>
+                    </div>
+                    <div class="border-l border-white border-opacity-30 pl-3">
+                        <button onclick="window.close()" class="bg-gray-500 text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                            <i class="fas fa-times mr-1"></i> Close
+                        </button>
+                    </div>
+                    <div id="incident-count" class="bg-red-500 px-4 py-2 rounded-lg font-semibold">
+                        <i class="fas fa-fire mr-1"></i>
+                        <span id="total-incidents">0</span> Active
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <div class="container mx-auto px-6 py-8">
+        
+        <!-- Status Overview Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+            <div class="bg-white p-4 rounded-lg shadow border-l-4 border-red-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-2xl font-bold text-red-600" id="critical-count">0</div>
+                        <div class="text-sm text-gray-600">Critical</div>
+                        <div class="text-xs text-red-500">Immediate Response</div>
+                    </div>
+                    <div class="text-red-500">
+                        <i class="fas fa-exclamation-triangle text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow border-l-4 border-orange-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-2xl font-bold text-orange-600" id="high-count">0</div>
+                        <div class="text-sm text-gray-600">High</div>
+                        <div class="text-xs text-orange-500">15 min response</div>
+                    </div>
+                    <div class="text-orange-500">
+                        <i class="fas fa-exclamation-circle text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow border-l-4 border-yellow-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-2xl font-bold text-yellow-600" id="medium-count">0</div>
+                        <div class="text-sm text-gray-600">Medium</div>
+                        <div class="text-xs text-yellow-500">1 hour response</div>
+                    </div>
+                    <div class="text-yellow-500">
+                        <i class="fas fa-exclamation text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow border-l-4 border-blue-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-2xl font-bold text-blue-600" id="low-count">0</div>
+                        <div class="text-sm text-gray-600">Low</div>
+                        <div class="text-xs text-blue-500">4 hour response</div>
+                    </div>
+                    <div class="text-blue-500">
+                        <i class="fas fa-info-circle text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow border-l-4 border-green-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-2xl font-bold text-green-600" id="resolved-count">0</div>
+                        <div class="text-sm text-gray-600">Resolved</div>
+                        <div class="text-xs text-green-500">Last 24h</div>
+                    </div>
+                    <div class="text-green-500">
+                        <i class="fas fa-check-circle text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions & Filters -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Quick Actions -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-bold mb-4 text-gray-700">🚀 Quick Actions</h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="createNewIncident()" class="bg-red-500 text-white px-4 py-3 rounded-lg hover:bg-red-600 transition-colors">
+                        <i class="fas fa-plus mr-2"></i> Create Incident
+                    </button>
+                    <button onclick="bulkActions()" class="bg-blue-500 text-white px-4 py-3 rounded-lg hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-tasks mr-2"></i> Bulk Actions
+                    </button>
+                    <button onclick="scheduleMaintenanceWindow()" class="bg-purple-500 text-white px-4 py-3 rounded-lg hover:bg-purple-600 transition-colors">
+                        <i class="fas fa-calendar mr-2"></i> Maintenance
+                    </button>
+                    <button onclick="exportReports()" class="bg-green-500 text-white px-4 py-3 rounded-lg hover:bg-green-600 transition-colors">
+                        <i class="fas fa-download mr-2"></i> Export
+                    </button>
+                </div>
+            </div>
+
+            <!-- Incident Filters -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-bold mb-4 text-gray-700">🔍 Filter Incidents</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    <button onclick="filterIncidents('all')" class="filter-btn active bg-gray-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-list mr-1"></i> All
+                    </button>
+                    <button onclick="filterIncidents('speed_violation')" class="filter-btn bg-red-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-red-600 transition-colors">
+                        <i class="fas fa-tachometer-alt mr-1"></i> Speed
+                    </button>
+                    <button onclick="filterIncidents('route_deviation')" class="filter-btn bg-orange-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-orange-600 transition-colors">
+                        <i class="fas fa-route mr-1"></i> Route
+                    </button>
+                    <button onclick="filterIncidents('extended_stop')" class="filter-btn bg-yellow-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-yellow-600 transition-colors">
+                        <i class="fas fa-stop mr-1"></i> Stops
+                    </button>
+                    <button onclick="filterIncidents('fuel_emergency')" class="filter-btn bg-purple-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-purple-600 transition-colors">
+                        <i class="fas fa-gas-pump mr-1"></i> Fuel
+                    </button>
+                    <button onclick="filterIncidents('system_failure')" class="filter-btn bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-indigo-600 transition-colors">
+                        <i class="fas fa-cog mr-1"></i> System
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Incidents -->
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-700">🚨 Active Incidents</h2>
+                    <p class="text-sm text-gray-500">Real-time incident monitoring and response</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="flex items-center space-x-2">
+                        <button onclick="toggleAutoRefresh()" id="auto-refresh-btn" class="bg-green-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-green-600 transition-colors">
+                            <i class="fas fa-play mr-1"></i> Auto-Refresh
+                        </button>
+                        <button onclick="refreshIncidents()" class="bg-blue-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-600 transition-colors">
+                            <i class="fas fa-sync-alt mr-1"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        <div id="last-update">Loading...</div>
+                        <div id="next-refresh" class="text-green-600"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="incidents-container" class="space-y-4">
+                <div class="text-center text-gray-500 py-8">
+                    <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                    <div>Loading incidents...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Dashboard Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Escalation Policy -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-bold mb-4 text-indigo-700">📟 Escalation Policy</h2>
+                <div class="space-y-4">
+                    <div class="p-4 bg-green-50 rounded-lg border border-green-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="font-bold text-green-800">Level 1 - Primary</div>
+                            <div class="text-green-600 text-sm">5 min timeout</div>
+                        </div>
+                        <div class="text-sm text-green-600 space-y-1">
+                            <div>📱 Push → Fleet Manager, IT, Ops, Safety</div>
+                            <div>📧 Email → Immediate dispatch</div>
+                            <div>📞 Phone → Auto-dial after 1 min</div>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="font-bold text-orange-800">Level 2 - Secondary</div>
+                            <div class="text-orange-600 text-sm">3 min timeout</div>
+                        </div>
+                        <div class="text-sm text-orange-600 space-y-1">
+                            <div>📱 Push → Security Chief, Transport Sup.</div>
+                            <div>📧 Email → Management CC'd</div>
+                            <div>📞 Phone → Every minute</div>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-red-50 rounded-lg border border-red-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="font-bold text-red-800">Level 3 - Emergency</div>
+                            <div class="text-red-600 text-sm">Final escalation</div>
+                        </div>
+                        <div class="text-sm text-red-600 space-y-1">
+                            <div>📱 Push → Emergency Coordinator</div>
+                            <div>📧 Email → All stakeholders</div>
+                            <div>📞 Phone → Emergency hotline</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- On-Call Schedule -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-bold mb-4 text-purple-700">👥 On-Call Schedule</h2>
+                <div class="space-y-3">
+                    <div class="p-3 bg-blue-50 rounded border border-blue-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="font-semibold text-blue-800">Fleet Manager</div>
+                                <div class="text-sm text-blue-600">Primary On-Call</div>
+                            </div>
+                            <div class="text-right text-blue-600 text-sm">
+                                <div>📱 +91-9437100001</div>
+                                <div class="text-green-600">● Active</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="font-semibold text-gray-800">IT Emergency</div>
+                                <div class="text-sm text-gray-600">Technical Lead</div>
+                            </div>
+                            <div class="text-right text-gray-600 text-sm">
+                                <div>📱 +91-9437100002</div>
+                                <div class="text-green-600">● Active</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="font-semibold text-gray-800">Operations Control</div>
+                                <div class="text-sm text-gray-600">Operations Lead</div>
+                            </div>
+                            <div class="text-right text-gray-600 text-sm">
+                                <div>📱 +91-9437100003</div>
+                                <div class="text-green-600">● Active</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-yellow-50 rounded border border-yellow-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="font-semibold text-yellow-800">Safety Emergency</div>
+                                <div class="text-sm text-yellow-600">Safety Officer</div>
+                            </div>
+                            <div class="text-right text-yellow-600 text-sm">
+                                <div>📱 +91-9437100004</div>
+                                <div class="text-orange-600">⚠ Busy</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 p-3 bg-gray-100 rounded">
+                    <div class="text-sm text-gray-600">
+                        <div class="font-medium mb-1">Next Rotation:</div>
+                        <div>🔄 Sunday 2 AM (in 4h 32m)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Health -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-bold mb-4 text-green-700">💚 System Health</h2>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-3 bg-green-50 rounded border border-green-200">
+                        <div>
+                            <div class="font-semibold text-green-800">Notification System</div>
+                            <div class="text-sm text-green-600">All channels operational</div>
+                        </div>
+                        <div class="text-green-600">
+                            <i class="fas fa-check-circle text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-green-50 rounded border border-green-200">
+                        <div>
+                            <div class="font-semibold text-green-800">Fleet Tracking API</div>
+                            <div class="text-sm text-green-600">Real-time data flowing</div>
+                        </div>
+                        <div class="text-green-600">
+                            <i class="fas fa-check-circle text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-yellow-50 rounded border border-yellow-200">
+                        <div>
+                            <div class="font-semibold text-yellow-800">SMS Gateway</div>
+                            <div class="text-sm text-yellow-600">Slight delay (2-3s)</div>
+                        </div>
+                        <div class="text-yellow-600">
+                            <i class="fas fa-exclamation-triangle text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-green-50 rounded border border-green-200">
+                        <div>
+                            <div class="font-semibold text-green-800">Mobile Push</div>
+                            <div class="text-sm text-green-600">99.8% delivery rate</div>
+                        </div>
+                        <div class="text-green-600">
+                            <i class="fas fa-check-circle text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 p-3 bg-blue-100 rounded">
+                    <div class="text-sm text-blue-800">
+                        <div class="font-medium mb-1">📊 Performance Metrics (24h):</div>
+                        <div>⚡ Avg Response Time: 1.2s</div>
+                        <div>📨 Messages Sent: 1,247</div>
+                        <div>✅ Success Rate: 99.2%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:8006';
+        let allIncidents = [];
+
+        // Initialize the application
+        let autoRefreshInterval = null;
+        let isAutoRefreshEnabled = false;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadIncidents();
+            updateResolvedCount();
+            startAutoRefresh();
+        });
+
+        // Load incidents
+        async function loadIncidents() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/incidents/pagerduty`);
+                const data = await response.json();
+                allIncidents = data.incidents || [];
+                
+                updateIncidentCounts();
+                displayIncidents(allIncidents);
+                
+                document.getElementById('last-update').textContent = 
+                    `Last updated: ${new Date().toLocaleTimeString()}`;
+                    
+            } catch (error) {
+                console.error('Error loading incidents:', error);
+                showError('Failed to load incidents');
+            }
+        }
+
+        // Update incident counts
+        function updateIncidentCounts() {
+            const critical = allIncidents.filter(i => i.severity === 'critical').length;
+            const high = allIncidents.filter(i => i.severity === 'high').length;
+            const medium = allIncidents.filter(i => i.severity === 'medium').length;
+            const low = allIncidents.filter(i => i.severity === 'low').length;
+
+            document.getElementById('critical-count').textContent = critical;
+            document.getElementById('high-count').textContent = high;
+            document.getElementById('medium-count').textContent = medium;
+            document.getElementById('low-count').textContent = low;
+            document.getElementById('total-incidents').textContent = allIncidents.length;
+        }
+
+        // Display incidents
+        function displayIncidents(incidents) {
+            const container = document.getElementById('incidents-container');
+            
+            if (incidents.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-green-600 py-8">
+                        <i class="fas fa-check-circle text-4xl mb-4"></i>
+                        <div class="text-xl font-bold">No Active Incidents</div>
+                        <div class="text-sm">All systems are operating normally</div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = incidents.map(incident => {
+                const severityColor = getSeverityColor(incident.severity || 'critical');
+                const statusColor = incident.acknowledged ? 'bg-green-100 border-green-300' : 'bg-red-100 border-red-300';
+                const pulseClass = !incident.acknowledged ? 'critical-pulse' : '';
+                
+                return `
+                    <div class="incident-card p-4 border rounded-lg ${statusColor} ${pulseClass}">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2">
+                                    <span class="px-2 py-1 rounded text-xs font-bold text-white ${severityColor}">
+                                        ${(incident.severity || 'CRITICAL').toUpperCase()}
+                                    </span>
+                                    <span class="ml-2 text-sm text-gray-600">${incident.incident_id}</span>
+                                    <span class="ml-auto text-xs text-gray-500">
+                                        ${new Date(incident.timestamp).toLocaleString()}
+                                    </span>
+                                </div>
+                                
+                                <h3 class="font-bold text-lg text-gray-800 mb-2">
+                                    🚛 ${incident.vehicle_id} - ${incident.incident_type}
+                                </h3>
+                                
+                                <p class="text-gray-600 mb-3">${incident.message}</p>
+                                
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                                    <div>
+                                        <span class="font-medium">Location:</span>
+                                        <span class="text-gray-600">${incident.location || 'Unknown'}</span>
+                                    </div>
+                                    <div>
+                                        <span class="font-medium">Driver:</span>
+                                        <span class="text-gray-600">${incident.driver_name || 'N/A'}</span>
+                                    </div>
+                                    <div>
+                                        <span class="font-medium">Escalation Level:</span>
+                                        <span class="text-gray-600">${incident.escalation_level || 1}</span>
+                                    </div>
+                                    <div>
+                                        <span class="font-medium">Response Time:</span>
+                                        <span class="text-gray-600">${incident.response_time || 'Pending'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="ml-4 flex flex-col space-y-2">
+                                ${!incident.acknowledged ? `
+                                    <button onclick="acknowledgeIncident('${incident.incident_id}')" 
+                                            class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
+                                        <i class="fas fa-check mr-1"></i> Acknowledge
+                                    </button>
+                                ` : `
+                                    <span class="bg-green-600 text-white px-3 py-1 rounded text-sm">
+                                        <i class="fas fa-check mr-1"></i> Acknowledged
+                                    </span>
+                                `}
+                                <button onclick="escalateIncident('${incident.incident_id}')" 
+                                        class="bg-orange-600 text-white px-3 py-1 rounded text-sm hover:bg-orange-700">
+                                    <i class="fas fa-level-up-alt mr-1"></i> Escalate
+                                </button>
+                                <button onclick="resolveIncident('${incident.incident_id}')" 
+                                        class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                                    <i class="fas fa-times mr-1"></i> Resolve
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Filter incidents
+        function filterIncidents(type) {
+            // Update active filter button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-gray-800');
+                btn.classList.add('bg-gray-600');
+            });
+            event.target.classList.add('active', 'bg-gray-800');
+            event.target.classList.remove('bg-gray-600');
+
+            let filteredIncidents = [];
+            
+            switch(type) {
+                case 'all':
+                    filteredIncidents = allIncidents;
+                    break;
+                case 'speed_violation':
+                    filteredIncidents = allIncidents.filter(i => 
+                        i.incident_type === 'CRITICAL_SPEED_VIOLATION' || 
+                        i.message.toLowerCase().includes('speed')
+                    );
+                    break;
+                case 'route_deviation':
+                    filteredIncidents = allIncidents.filter(i => 
+                        i.incident_type === 'ROUTE_DEVIATION' || 
+                        i.message.toLowerCase().includes('deviation')
+                    );
+                    break;
+                case 'extended_stop':
+                    filteredIncidents = allIncidents.filter(i => 
+                        i.incident_type === 'CRITICAL_EXTENDED_STOP' || 
+                        i.message.toLowerCase().includes('stopped')
+                    );
+                    break;
+                case 'fuel_emergency':
+                    filteredIncidents = allIncidents.filter(i => 
+                        i.message.toLowerCase().includes('fuel')
+                    );
+                    break;
+                case 'system_failure':
+                    filteredIncidents = allIncidents.filter(i => 
+                        i.message.toLowerCase().includes('system') || 
+                        i.message.toLowerCase().includes('failure')
+                    );
+                    break;
+            }
+            
+            displayIncidents(filteredIncidents);
+        }
+
+        // Incident actions
+        async function acknowledgeIncident(incidentId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/incidents/acknowledge/${incidentId}`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    showSuccess('Incident acknowledged successfully');
+                    refreshIncidents();
+                } else {
+                    showError('Failed to acknowledge incident');
+                }
+            } catch (error) {
+                console.error('Error acknowledging incident:', error);
+                showError('Error acknowledging incident');
+            }
+        }
+
+        async function escalateIncident(incidentId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/incidents/escalate/${incidentId}`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    showSuccess('Incident escalated to next level');
+                    refreshIncidents();
+                } else {
+                    showError('Failed to escalate incident');
+                }
+            } catch (error) {
+                console.error('Error escalating incident:', error);
+                showError('Error escalating incident');
+            }
+        }
+
+        async function resolveIncident(incidentId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/incidents/resolve/${incidentId}`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    showSuccess('Incident resolved successfully');
+                    refreshIncidents();
+                } else {
+                    showError('Failed to resolve incident');
+                }
+            } catch (error) {
+                console.error('Error resolving incident:', error);
+                showError('Error resolving incident');
+            }
+        }
+
+        function refreshIncidents() {
+            loadIncidents();
+        }
+
+        // Auto-refresh functionality
+        function startAutoRefresh() {
+            isAutoRefreshEnabled = true;
+            autoRefreshInterval = setInterval(() => {
+                loadIncidents();
+                updateNextRefreshCountdown();
+            }, 10000); // Refresh every 10 seconds
+            
+            const btn = document.getElementById('auto-refresh-btn');
+            btn.innerHTML = '<i class="fas fa-pause mr-1"></i> Auto-Refresh';
+            btn.className = 'bg-red-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-red-600 transition-colors';
+            
+            updateNextRefreshCountdown();
+        }
+
+        function stopAutoRefresh() {
+            isAutoRefreshEnabled = false;
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+            
+            const btn = document.getElementById('auto-refresh-btn');
+            btn.innerHTML = '<i class="fas fa-play mr-1"></i> Auto-Refresh';
+            btn.className = 'bg-green-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-green-600 transition-colors';
+            
+            document.getElementById('next-refresh').textContent = '';
+        }
+
+        function toggleAutoRefresh() {
+            if (isAutoRefreshEnabled) {
+                stopAutoRefresh();
+            } else {
+                startAutoRefresh();
+            }
+        }
+
+        function updateNextRefreshCountdown() {
+            if (!isAutoRefreshEnabled) return;
+            
+            let countdown = 10;
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    document.getElementById('next-refresh').textContent = `Next refresh in ${countdown}s`;
+                } else {
+                    document.getElementById('next-refresh').textContent = 'Refreshing...';
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
+        }
+
+        // Update resolved count
+        function updateResolvedCount() {
+            // Mock resolved incidents count
+            document.getElementById('resolved-count').textContent = Math.floor(Math.random() * 15) + 5;
+        }
+
+        // Additional UI functions
+        function createNewIncident() {
+            showSuccess('🆕 New incident creation dialog would open here');
+        }
+
+        function bulkActions() {
+            showSuccess('📋 Bulk actions panel would open here');
+        }
+
+        function scheduleMaintenanceWindow() {
+            showSuccess('🔧 Maintenance window scheduler would open here');
+        }
+
+        function exportReports() {
+            showSuccess('📊 Report export options would open here');
+        }
+
+        // Open mobile demo page
+        function openMobileDemo() {
+            window.open('mobile-demo.html', '_blank', 'width=400,height=800');
+        }
+
+        // Send mobile demo notification
+        async function sendMobileDemo() {
+            try {
+                // Create a demo incident
+                const demoIncident = {
+                    vehicle_id: "OD-03-NT-1007",
+                    incident_type: "CRITICAL_SPEED_VIOLATION", 
+                    driver_name: "Ravi Mishra",
+                    driver_phone: "+91-9437123007",
+                    location: "NH16 near Dhenkanal",
+                    speed: "95 km/h",
+                    timestamp: new Date().toISOString(),
+                    severity: "critical"
+                };
+
+                // Send to mobile endpoint
+                const response = await fetch(`${API_BASE_URL}/api/v1/mobile/demo-alert`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(demoIncident)
+                });
+
+                if (response.ok) {
+                    showSuccess('📱 Mobile demo alert sent successfully! Check your phone for notification.');
+                    
+                    // Also show a mock mobile notification popup
+                    showMobileNotificationPreview(demoIncident);
+                } else {
+                    showError('Failed to send mobile demo alert');
+                }
+            } catch (error) {
+                console.error('Error sending mobile demo:', error);
+                // Show demo notification anyway for demonstration
+                const demoIncident = {
+                    vehicle_id: "OD-03-NT-1007",
+                    incident_type: "CRITICAL_SPEED_VIOLATION", 
+                    driver_name: "Ravi Mishra",
+                    driver_phone: "+91-9437123007",
+                    location: "NH16 near Dhenkanal",
+                    speed: "95 km/h",
+                    timestamp: new Date().toISOString(),
+                    severity: "critical"
+                };
+                showMobileNotificationPreview(demoIncident);
+                showSuccess('📱 Demo notification created! (Simulated mobile alert)');
+            }
+        }
+
+        // Show mobile notification preview
+        function showMobileNotificationPreview(incident) {
+            const mobilePreview = document.createElement('div');
+            mobilePreview.className = 'fixed top-20 right-4 bg-white border-l-4 border-orange-500 rounded-lg shadow-xl z-50 max-w-sm';
+            mobilePreview.innerHTML = `
+                <div class="p-4">
+                    <div class="flex items-start">
+                        <div class="bg-orange-100 rounded-full p-2 mr-3">
+                            <i class="fas fa-truck text-orange-600 text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-1">
+                                <h4 class="font-semibold text-gray-900">FleetX Alert</h4>
+                                <span class="text-xs text-gray-500">now</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-2">🚛 ${incident.vehicle_id} - Speed Violation</p>
+                            <p class="text-xs text-gray-500">Driver: ${incident.driver_name}</p>
+                            <p class="text-xs text-gray-500">Speed: ${incident.speed} (Limit: 80 km/h)</p>
+                            <p class="text-xs text-gray-500">📍 ${incident.location}</p>
+                        </div>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                                class="text-gray-400 hover:text-gray-600 ml-2">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </div>
+                    <div class="mt-3 flex space-x-2">
+                        <button class="bg-orange-600 text-white px-3 py-1 rounded text-xs hover:bg-orange-700">
+                            View Details
+                        </button>
+                        <button class="bg-gray-500 text-white px-3 py-1 rounded text-xs hover:bg-gray-600">
+                            Acknowledge
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(mobilePreview);
+            
+            // Auto-remove after 10 seconds
+            setTimeout(() => {
+                if (mobilePreview.parentNode) {
+                    mobilePreview.remove();
+                }
+            }, 10000);
+        }
+
+        function getSeverityColor(severity) {
+            switch(severity.toLowerCase()) {
+                case 'critical': return 'bg-red-500';
+                case 'high': return 'bg-orange-500';
+                case 'medium': return 'bg-yellow-500';
+                case 'low': return 'bg-blue-500';
+                default: return 'bg-red-500';
+            }
+        }
+
+        function getSeverityTextColor(severity) {
+            switch(severity.toLowerCase()) {
+                case 'critical': return 'text-red-700';
+                case 'high': return 'text-orange-700';
+                case 'medium': return 'text-yellow-700';
+                case 'low': return 'text-blue-700';
+                default: return 'text-red-700';
+            }
+        }
+
+        function getSeverityBorderColor(severity) {
+            switch(severity.toLowerCase()) {
+                case 'critical': return 'border-red-500';
+                case 'high': return 'border-orange-500';
+                case 'medium': return 'border-yellow-500';
+                case 'low': return 'border-blue-500';
+                default: return 'border-red-500';
+            }
+        }
+
+        function showSuccess(message) {
+            showNotification(message, 'green');
+        }
+
+        function showError(message) {
+            showNotification(message, 'red');
+        }
+
+        function showNotification(message, color) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 bg-${color}-500 text-white p-4 rounded-lg shadow-lg z-50`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

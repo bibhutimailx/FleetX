@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📱 FleetX Mobile Alert - Demo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        .mobile-container {
+            max-width: 380px;
+            margin: 0 auto;
+            background: #000;
+            border-radius: 25px;
+            padding: 10px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+        .mobile-screen {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            min-height: 700px;
+            position: relative;
+            overflow: hidden;
+        }
+        .notification-popup {
+            animation: slideDown 0.5s ease-out;
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .alert-pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 p-4">
+    <!-- Mobile Phone Mockup -->
+    <div class="mobile-container">
+        <div class="mobile-screen">
+            <!-- Status Bar -->
+            <div class="flex justify-between items-center p-4 text-white text-sm">
+                <div class="flex items-center space-x-1">
+                    <i class="fas fa-signal"></i>
+                    <span>FleetX</span>
+                    <i class="fas fa-wifi"></i>
+                </div>
+                <div class="text-center font-medium">12:47 PM</div>
+                <div class="flex items-center space-x-1">
+                    <span>85%</span>
+                    <i class="fas fa-battery-three-quarters"></i>
+                </div>
+            </div>
+
+            <!-- Notification Area -->
+            <div id="notification-area" class="px-4">
+                <!-- Demo notification will appear here -->
+            </div>
+
+            <!-- Home Screen -->
+            <div class="p-6 pt-8">
+                <div class="text-center mb-8">
+                    <h1 class="text-2xl font-bold text-white mb-2">📱 FleetX Mobile</h1>
+                    <p class="text-white opacity-75 text-sm">Fleet Management Alert System</p>
+                </div>
+
+                <!-- App Grid -->
+                <div class="grid grid-cols-3 gap-6 mb-8">
+                    <div class="text-center">
+                        <div class="bg-orange-500 rounded-2xl p-4 mb-2">
+                            <i class="fas fa-truck text-white text-2xl"></i>
+                        </div>
+                        <span class="text-white text-xs">FleetX</span>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-red-500 rounded-2xl p-4 mb-2">
+                            <i class="fas fa-exclamation-triangle text-white text-2xl"></i>
+                        </div>
+                        <span class="text-white text-xs">Alerts</span>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-blue-500 rounded-2xl p-4 mb-2">
+                            <i class="fas fa-map text-white text-2xl"></i>
+                        </div>
+                        <span class="text-white text-xs">Maps</span>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-green-500 rounded-2xl p-4 mb-2">
+                            <i class="fas fa-phone text-white text-2xl"></i>
+                        </div>
+                        <span class="text-white text-xs">Phone</span>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-purple-500 rounded-2xl p-4 mb-2">
+                            <i class="fas fa-envelope text-white text-2xl"></i>
+                        </div>
+                        <span class="text-white text-xs">Mail</span>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-yellow-500 rounded-2xl p-4 mb-2">
+                            <i class="fas fa-gas-pump text-white text-2xl"></i>
+                        </div>
+                        <span class="text-white text-xs">Fuel</span>
+                    </div>
+                </div>
+
+                <!-- Demo Button -->
+                <div class="text-center">
+                    <button onclick="triggerDemoAlert()" 
+                            class="bg-white text-gray-900 px-6 py-3 rounded-full font-medium hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-bell mr-2"></i>
+                        Trigger Demo Alert
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bottom Dock -->
+            <div class="absolute bottom-4 left-4 right-4">
+                <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-3">
+                    <div class="flex justify-around">
+                        <div class="p-2">
+                            <i class="fas fa-home text-white text-xl"></i>
+                        </div>
+                        <div class="p-2">
+                            <i class="fas fa-chart-bar text-white text-xl"></i>
+                        </div>
+                        <div class="p-2">
+                            <i class="fas fa-cog text-white text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="max-w-lg mx-auto mt-8 text-center">
+        <h2 class="text-xl font-bold text-white mb-4">📱 Mobile Demo Instructions</h2>
+        <div class="bg-gray-800 rounded-lg p-6 text-left">
+            <div class="text-green-400 mb-4">
+                <i class="fas fa-check-circle mr-2"></i>
+                <strong>Demo Ready!</strong>
+            </div>
+            <div class="text-white text-sm space-y-2">
+                <p>1. <strong>Trigger Alert:</strong> Click "Trigger Demo Alert" button on phone</p>
+                <p>2. <strong>View Notification:</strong> FleetX alert will appear at top of screen</p>
+                <p>3. <strong>Check Backend:</strong> View console logs for mobile push notifications</p>
+                <p>4. <strong>Real Demo:</strong> Use PagerX "Mobile Demo" button for live simulation</p>
+            </div>
+            <div class="mt-4 p-3 bg-blue-900 rounded text-blue-200 text-xs">
+                <i class="fas fa-info-circle mr-1"></i>
+                This simulates how fleet managers would receive critical incident alerts on their mobile devices.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Demo alert data
+        const demoAlerts = [
+            {
+                title: "🚛 Speed Violation Alert",
+                vehicle: "OD-03-NT-1007",
+                driver: "Ravi Mishra",
+                message: "Critical speed violation detected",
+                speed: "95 km/h (Limit: 80 km/h)",
+                location: "NH16 near Dhenkanal",
+                time: "now",
+                severity: "critical"
+            },
+            {
+                title: "⛽ Low Fuel Warning",
+                vehicle: "OD-03-NT-1012",
+                driver: "Deepak Patel",
+                message: "Fuel level critically low",
+                speed: "12% remaining",
+                location: "Near Parjang Toll Plaza", 
+                time: "2 min ago",
+                severity: "high"
+            },
+            {
+                title: "🛑 Extended Stop Alert",
+                vehicle: "OD-03-NT-1013",
+                driver: "Subash Jena",
+                message: "Vehicle stopped for 45 minutes",
+                speed: "0 km/h",
+                location: "Off Route - Rural Road",
+                time: "5 min ago",
+                severity: "critical"
+            }
+        ];
+
+        function triggerDemoAlert() {
+            const alert = demoAlerts[Math.floor(Math.random() * demoAlerts.length)];
+            showMobileNotification(alert);
+        }
+
+        function showMobileNotification(alert) {
+            const notificationArea = document.getElementById('notification-area');
+            
+            const severityColor = alert.severity === 'critical' ? 'bg-orange-500' : 
+                                 alert.severity === 'high' ? 'bg-yellow-500' : 'bg-blue-500';
+            
+            const notification = document.createElement('div');
+            notification.className = `notification-popup ${severityColor} text-white rounded-lg p-4 mb-4 shadow-lg alert-pulse`;
+            notification.innerHTML = `
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-sm">${alert.title}</h4>
+                            <span class="text-xs opacity-75">${alert.time}</span>
+                        </div>
+                        <p class="text-sm mb-2">${alert.message}</p>
+                        <div class="text-xs opacity-90 space-y-1">
+                            <div><strong>Vehicle:</strong> ${alert.vehicle}</div>
+                            <div><strong>Driver:</strong> ${alert.driver}</div>
+                            <div><strong>Speed:</strong> ${alert.speed}</div>
+                            <div><strong>Location:</strong> ${alert.location}</div>
+                        </div>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            class="ml-3 text-white opacity-75 hover:opacity-100">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="mt-3 flex space-x-2">
+                    <button class="bg-white bg-opacity-20 px-3 py-1 rounded text-xs hover:bg-opacity-30">
+                        View Details
+                    </button>
+                    <button class="bg-white bg-opacity-20 px-3 py-1 rounded text-xs hover:bg-opacity-30">
+                        Acknowledge
+                    </button>
+                    <button class="bg-white bg-opacity-20 px-3 py-1 rounded text-xs hover:bg-opacity-30">
+                        Call Driver
+                    </button>
+                </div>
+            `;
+            
+            notificationArea.appendChild(notification);
+            
+            // Play notification sound (if audio permission available)
+            try {
+                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYaBlqH3fPIdSYHLYPM8tiEOQcbZrfs4pxSEAmWJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCYJBCY');
+                audio.play();
+            } catch (e) {
+                // Audio play failed (permissions)
+            }
+            
+            // Auto-remove after 15 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateY(-20px)';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 15000);
+        }
+
+        // Auto-trigger a demo alert after 3 seconds for immediate demo
+        setTimeout(() => {
+            showMobileNotification(demoAlerts[0]);
+        }, 3000);
+    </script>
+</body>
+</html>

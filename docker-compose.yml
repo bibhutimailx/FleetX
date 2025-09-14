@@ -1,0 +1,116 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: fleet_postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-fleet_management}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - fleet_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: fleet_backend
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-fleet_management}
+      - WHILSEYE_API_URL=${WHILSEYE_API_URL}
+      - WHILSEYE_USERNAME=${WHILSEYE_USERNAME}
+      - WHILSEYE_PASSWORD=${WHILSEYE_PASSWORD}
+      - WHILSEYE_API_KEY=${WHILSEYE_API_KEY}
+      - GEOFENCE_LAT=${GEOFENCE_LAT:-40.7128}
+      - GEOFENCE_LNG=${GEOFENCE_LNG:--74.0060}
+      - GEOFENCE_RADIUS=${GEOFENCE_RADIUS:-100}
+      - FCM_SERVICE_ACCOUNT_KEY=${FCM_SERVICE_ACCOUNT_KEY}
+      - FCM_PROJECT_ID=${FCM_PROJECT_ID}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - POLLING_INTERVAL=${POLLING_INTERVAL:-30}
+      - DEBUG=${DEBUG:-false}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-fallback-secret-key}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://localhost:80}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - fleet_network
+    volumes:
+      - ./logs:/app/logs
+      - ${FCM_SERVICE_ACCOUNT_KEY:-./dummy}:/app/serviceAccountKey.json:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend Web App
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: fleet_frontend
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000/api/v1
+      - REACT_APP_WS_URL=ws://localhost:8000/ws/vehicle-updates
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - fleet_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis (for caching and session management)
+  redis:
+    image: redis:7-alpine
+    container_name: fleet_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - fleet_network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  fleet_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+

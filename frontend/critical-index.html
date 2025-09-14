@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NTPC Critical Fleet Management - Emergency Operations</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        .map-container {
+            height: 500px;
+            border-radius: 8px;
+        }
+        
+        .critical-alert {
+            border: 3px solid #DC2626;
+            background: linear-gradient(45deg, #FEF2F2, #FECACA);
+            animation: critical-pulse 1.5s infinite;
+            box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
+        }
+        
+        @keyframes critical-pulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
+            }
+            50% { 
+                transform: scale(1.02);
+                box-shadow: 0 0 30px rgba(220, 38, 38, 0.8);
+            }
+        }
+        
+        .paging-alert {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 9999;
+            background: linear-gradient(45deg, #DC2626, #B91C1C);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            animation: paging-flash 1s infinite;
+        }
+        
+        @keyframes paging-flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .camera-feed {
+            border: 2px solid #10B981;
+            border-radius: 8px;
+            background: #F0FDF4;
+        }
+        
+        .camera-status-active {
+            background: #10B981;
+            animation: camera-blink 2s infinite;
+        }
+        
+        @keyframes camera-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .incident-critical {
+            background: linear-gradient(135deg, #FEF2F2, #FEE2E2);
+            border-left: 6px solid #DC2626;
+            animation: incident-pulse 2s infinite;
+        }
+        
+        @keyframes incident-pulse {
+            0%, 100% { background-color: #FEF2F2; }
+            50% { background-color: #FEE2E2; }
+        }
+        
+        .gate-scanner {
+            background: linear-gradient(135deg, #F0FDF4, #DCFCE7);
+            border: 2px solid #10B981;
+            border-radius: 12px;
+        }
+        
+        .number-plate {
+            background: #1F2937;
+            color: #F59E0B;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 4px;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Critical Incident Paging Alert -->
+    <div id="paging-alert" class="paging-alert hidden">
+        <div class="flex items-center justify-center">
+            <i class="fas fa-exclamation-triangle text-2xl mr-3"></i>
+            <div>
+                <div class="font-bold text-lg">🚨 CRITICAL INCIDENT ALERT 🚨</div>
+                <div id="paging-message" class="text-sm"></div>
+                <div class="text-xs mt-1">Emergency contacts have been paged automatically</div>
+            </div>
+            <button onclick="dismissPagingAlert()" class="ml-6 text-white hover:text-gray-200 text-xl">✕</button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-red-700 to-red-600 text-white shadow-xl">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="bg-white rounded-full p-2 mr-3">
+                        <i class="fas fa-shield-alt text-red-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">NTPC Critical Fleet Management</h1>
+                        <p class="text-sm opacity-90">Emergency Operations & Smart Gate Monitoring</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-center">
+                        <div class="bg-red-500 px-3 py-1 rounded text-xs">🚨 EMERGENCY MODE</div>
+                        <div id="last-update" class="text-xs mt-1">Loading...</div>
+                    </div>
+                    <div id="critical-count" class="bg-red-800 px-4 py-2 rounded critical-alert">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                        <span id="critical-number">0</span> Critical
+                    </div>
+                    <div id="paging-status" class="bg-orange-600 px-3 py-2 rounded">
+                        <i class="fas fa-broadcast-tower mr-1"></i>
+                        Paging Ready
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <div class="container mx-auto px-4 py-6">
+        <!-- Critical Incident Banner -->
+        <div id="critical-banner" class="hidden mb-6 p-4 critical-alert rounded-lg">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-2xl mr-3"></i>
+                    <div>
+                        <h3 class="text-lg font-bold text-red-800">CRITICAL INCIDENT DETECTED</h3>
+                        <p id="critical-banner-message" class="text-red-700"></p>
+                    </div>
+                </div>
+                <button onclick="dismissCriticalBanner()" class="text-red-600 hover:text-red-800 text-xl">✕</button>
+            </div>
+        </div>
+
+        <!-- Smart Gate Camera System -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <!-- Live Camera Feed -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow camera-feed">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-green-800">📷 Smart Gate Camera System</h2>
+                    <div class="flex items-center space-x-2">
+                        <div class="camera-status-active w-3 h-3 rounded-full"></div>
+                        <span class="text-sm font-medium text-green-700">LIVE MONITORING</span>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-900 rounded-lg p-4 mb-4">
+                    <div class="flex items-center justify-center h-64 text-white">
+                        <div class="text-center">
+                            <i class="fas fa-video text-6xl mb-4 text-green-400"></i>
+                            <div class="text-xl font-bold">CAM_GATE_01 - Main Entry</div>
+                            <div class="text-sm opacity-75">NTPC Talcher Super Thermal Power Station</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-4 gap-2">
+                    <div class="camera-status-active p-2 rounded text-center text-white text-xs">
+                        <div>CAM_GATE_01</div>
+                        <div>Main Entry</div>
+                    </div>
+                    <div class="camera-status-active p-2 rounded text-center text-white text-xs">
+                        <div>CAM_GATE_02</div>
+                        <div>Secondary</div>
+                    </div>
+                    <div class="camera-status-active p-2 rounded text-center text-white text-xs">
+                        <div>CAM_LOAD_01</div>
+                        <div>Loading Bay A</div>
+                    </div>
+                    <div class="camera-status-active p-2 rounded text-center text-white text-xs">
+                        <div>CAM_LOAD_02</div>
+                        <div>Loading Bay B</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gate Entry Scanner -->
+            <div class="bg-white p-6 rounded-lg shadow gate-scanner">
+                <h2 class="text-xl font-bold text-green-800 mb-4">🎯 Smart Gate Scanner</h2>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Scan Vehicle Number Plate</label>
+                    <div class="flex">
+                        <input type="text" id="vehicle-scan-input" 
+                               placeholder="OD-03-NT-1001" 
+                               class="flex-1 border border-gray-300 rounded-l-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                        <button onclick="scanVehicle()" 
+                                class="bg-green-600 text-white px-4 py-2 rounded-r-lg hover:bg-green-700">
+                            <i class="fas fa-camera mr-1"></i> Scan
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="scan-result" class="hidden mb-4 p-3 bg-green-50 rounded border border-green-200">
+                    <div class="text-sm font-medium text-green-800">✅ Vehicle Detected</div>
+                    <div id="detected-plate" class="number-plate mt-2"></div>
+                    <div id="detection-confidence" class="text-xs text-green-600 mt-1"></div>
+                </div>
+                
+                <div class="text-xs text-gray-600">
+                    <div class="flex items-center mb-1">
+                        <i class="fas fa-eye text-green-500 mr-1"></i>
+                        AI-powered OCR detection
+                    </div>
+                    <div class="flex items-center mb-1">
+                        <i class="fas fa-shield-alt text-blue-500 mr-1"></i>
+                        Real-time security logging
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-database text-purple-500 mr-1"></i>
+                        Automatic entry recording
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Critical Incidents and Gate Entries -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Critical Incidents -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-bold mb-4 text-red-700">🚨 Critical Incidents</h2>
+                <div id="critical-incidents" class="space-y-3">
+                    <div class="text-center text-gray-500">Loading critical incidents...</div>
+                </div>
+            </div>
+
+            <!-- Recent Gate Entries -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-bold mb-4 text-green-700">🚪 Gate Entry Log</h2>
+                <div id="gate-entries" class="space-y-3 max-h-64 overflow-y-auto">
+                    <div class="text-center text-gray-500">Loading gate entries...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fleet Map with Critical Markers -->
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold">🗺️ Critical Fleet Monitoring</h2>
+                <div class="flex space-x-2">
+                    <button id="emergency-mode-btn" class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">
+                        <i class="fas fa-exclamation-triangle mr-1"></i> Emergency Mode
+                    </button>
+                    <button id="center-map-btn" class="bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600">
+                        <i class="fas fa-crosshairs mr-1"></i> Center
+                    </button>
+                </div>
+            </div>
+            <div id="map" class="map-container"></div>
+        </div>
+
+        <!-- Emergency Contacts -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-xl font-bold mb-4 text-blue-700">📞 Emergency Contacts</h2>
+            <div id="emergency-contacts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="p-3 border border-red-200 rounded bg-red-50">
+                    <div class="font-bold text-red-800">Fleet Manager</div>
+                    <div class="text-sm text-red-600">📱 +91-9437100001</div>
+                    <div class="text-sm text-red-600">📟 +91-9437200001</div>
+                    <div class="text-xs text-red-500">✉️ fleet.manager@ntpc.co.in</div>
+                </div>
+                <div class="p-3 border border-orange-200 rounded bg-orange-50">
+                    <div class="font-bold text-orange-800">IT Emergency Team</div>
+                    <div class="text-sm text-orange-600">📱 +91-9437100002</div>
+                    <div class="text-sm text-orange-600">📟 +91-9437200002</div>
+                    <div class="text-xs text-orange-500">✉️ it.emergency@ntpc.co.in</div>
+                </div>
+                <div class="p-3 border border-blue-200 rounded bg-blue-50">
+                    <div class="font-bold text-blue-800">Operations Control</div>
+                    <div class="text-sm text-blue-600">📱 +91-9437100003</div>
+                    <div class="text-sm text-blue-600">📟 +91-9437200003</div>
+                    <div class="text-xs text-blue-500">✉️ operations.control@ntpc.co.in</div>
+                </div>
+                <div class="p-3 border border-green-200 rounded bg-green-50">
+                    <div class="font-bold text-green-800">Safety Emergency</div>
+                    <div class="text-sm text-green-600">📱 +91-9437100004</div>
+                    <div class="text-sm text-green-600">📟 +91-9437200004</div>
+                    <div class="text-xs text-green-500">✉️ safety.emergency@ntpc.co.in</div>
+                </div>
+                <div class="p-3 border border-purple-200 rounded bg-purple-50">
+                    <div class="font-bold text-purple-800">Security Chief</div>
+                    <div class="text-sm text-purple-600">📱 +91-9437100005</div>
+                    <div class="text-sm text-purple-600">📟 +91-9437200005</div>
+                    <div class="text-xs text-purple-500">✉️ security.chief@ntpc.co.in</div>
+                </div>
+                <div class="p-3 border border-indigo-200 rounded bg-indigo-50">
+                    <div class="font-bold text-indigo-800">Transport Supervisor</div>
+                    <div class="text-sm text-indigo-600">📱 +91-9437100006</div>
+                    <div class="text-sm text-indigo-600">📟 +91-9437200006</div>
+                    <div class="text-xs text-indigo-500">✉️ transport.supervisor@ntpc.co.in</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://127.0.0.1:8005';
+        
+        // Global variables
+        let map;
+        let vehicleMarkers = {};
+        let criticalIncidents = [];
+        let gateEntries = [];
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeMap();
+            loadData();
+            setInterval(refreshData, 5000); // Refresh every 5 seconds for critical monitoring
+        });
+
+        // Initialize map
+        function initializeMap() {
+            map = L.map('map').setView([20.9100, 85.6500], 10);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap | NTPC Critical Operations'
+            }).addTo(map);
+
+            // Add NTPC plant marker with gate cameras
+            L.marker([20.9463, 85.2190], {
+                icon: L.divIcon({
+                    html: '<div class="bg-blue-800 text-white rounded-lg w-16 h-16 flex items-center justify-center text-lg font-bold shadow-xl border-4 border-white"><i class="fas fa-industry"></i></div>',
+                    className: 'plant-marker',
+                    iconSize: [64, 64],
+                    iconAnchor: [32, 32]
+                })
+            }).bindPopup(`
+                <div class="p-3">
+                    <h3 class="font-bold text-blue-800">🏭 NTPC Talcher - Smart Gate</h3>
+                    <p><strong>📷 Active Cameras:</strong> 4</p>
+                    <p><strong>🎯 AI Detection:</strong> Enabled</p>
+                    <p><strong>🚨 Emergency System:</strong> Active</p>
+                    <div class="mt-2 text-xs text-green-600">All gate systems operational</div>
+                </div>
+            `).addTo(map);
+        }
+
+        // Load all data
+        async function loadData() {
+            try {
+                const [vehiclesResponse, incidentsResponse, gateResponse] = await Promise.all([
+                    fetch(`${API_BASE_URL}/api/v1/vehicles/locations`),
+                    fetch(`${API_BASE_URL}/api/v1/incidents/critical`),
+                    fetch(`${API_BASE_URL}/api/v1/gate/entries`)
+                ]);
+                
+                const vehiclesData = await vehiclesResponse.json();
+                const incidentsData = await incidentsResponse.json();
+                const gateData = await gateResponse.json();
+                
+                criticalIncidents = incidentsData.incidents || [];
+                gateEntries = gateData.entries || [];
+                
+                updateCriticalIncidents();
+                updateGateEntries();
+                updateMap(vehiclesData.locations || []);
+                
+                // Update critical count
+                const criticalCount = criticalIncidents.length;
+                document.getElementById('critical-number').textContent = criticalCount;
+                
+                // Show paging alert for new critical incidents
+                if (criticalCount > 0) {
+                    const latestIncident = criticalIncidents[0];
+                    if (latestIncident && !latestIncident.acknowledged) {
+                        showPagingAlert(latestIncident.message);
+                    }
+                }
+                
+                document.getElementById('last-update').textContent = 
+                    `Updated: ${new Date().toLocaleTimeString()}`;
+                    
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showError('Failed to connect to NTPC Critical Operations API');
+            }
+        }
+
+        // Update critical incidents display
+        function updateCriticalIncidents() {
+            const incidentsDiv = document.getElementById('critical-incidents');
+            
+            if (criticalIncidents.length === 0) {
+                incidentsDiv.innerHTML = '<div class="text-center text-green-600">✅ No critical incidents</div>';
+                return;
+            }
+
+            incidentsDiv.innerHTML = criticalIncidents.map(incident => `
+                <div class="incident-critical p-4 rounded">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-exclamation-triangle text-red-600 mr-2"></i>
+                                <h4 class="font-bold text-red-800">${incident.incident_type.replace('_', ' ').toUpperCase()}</h4>
+                                <span class="ml-2 bg-red-600 text-white px-2 py-1 rounded-full text-xs">CRITICAL</span>
+                            </div>
+                            <p class="text-red-700 mb-2">${incident.message}</p>
+                            <div class="text-xs text-red-600">
+                                <div>📍 Location: ${incident.location?.description || 'Unknown'}</div>
+                                <div>⏰ Time: ${new Date(incident.timestamp).toLocaleString()}</div>
+                                <div>📟 Paged: ${incident.paged_contacts ? incident.paged_contacts.join(', ') : 'No'}</div>
+                            </div>
+                        </div>
+                        <button onclick="acknowledgeIncident('${incident.id}')" 
+                                class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">
+                            Acknowledge
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update gate entries display
+        function updateGateEntries() {
+            const gateDiv = document.getElementById('gate-entries');
+            
+            if (gateEntries.length === 0) {
+                gateDiv.innerHTML = '<div class="text-center text-gray-500">No recent gate entries</div>';
+                return;
+            }
+
+            gateDiv.innerHTML = gateEntries.slice(0, 5).map(entry => `
+                <div class="border border-green-200 rounded p-3 bg-green-50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="font-bold text-green-800">${entry.vehicle_id}</div>
+                            <div class="number-plate text-xs">${entry.number_plate}</div>
+                            <div class="text-sm text-green-600">Driver: ${entry.driver_name}</div>
+                        </div>
+                        <div class="text-right text-xs text-green-600">
+                            <div>📷 ${entry.gate_officer}</div>
+                            <div>⚖️ ${entry.load_weight?.toFixed(1)}T</div>
+                            <div>🕐 ${new Date(entry.entry_time).toLocaleTimeString()}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update map with critical markers
+        function updateMap(vehicles) {
+            // Clear existing markers
+            Object.values(vehicleMarkers).forEach(marker => map.removeLayer(marker));
+            vehicleMarkers = {};
+
+            vehicles.forEach(vehicle => {
+                let iconClass = 'bg-green-500';
+                let statusText = 'NORMAL';
+                
+                if (vehicle.route_status === 'critical_stop') {
+                    iconClass = 'bg-red-600 critical-alert';
+                    statusText = 'CRITICAL STOP';
+                } else if (vehicle.route_status === 'critical_speed') {
+                    iconClass = 'bg-red-600 critical-alert';
+                    statusText = 'CRITICAL SPEED';
+                } else if (vehicle.speed === 0) {
+                    iconClass = 'bg-yellow-500';
+                    statusText = 'STOPPED';
+                }
+                
+                const icon = L.divIcon({
+                    html: `
+                        <div class="${iconClass} text-white rounded-lg w-12 h-12 flex items-center justify-center text-xs font-bold shadow-lg border-2 border-white">
+                            ${vehicle.vehicle_id.slice(-2)}
+                        </div>
+                    `,
+                    className: 'vehicle-marker',
+                    iconSize: [48, 48],
+                    iconAnchor: [24, 24]
+                });
+
+                const marker = L.marker([vehicle.latitude, vehicle.longitude], { icon })
+                    .bindPopup(`
+                        <div class="p-4">
+                            <h3 class="font-bold text-lg ${vehicle.route_status.includes('critical') ? 'text-red-600' : 'text-blue-600'}">${vehicle.vehicle_id}</h3>
+                            <div class="mt-2">
+                                <div><strong>Status:</strong> <span class="${vehicle.route_status.includes('critical') ? 'text-red-600' : 'text-green-600'}">${statusText}</span></div>
+                                <div><strong>Driver:</strong> ${vehicle.driver_name}</div>
+                                <div><strong>Phone:</strong> ${vehicle.driver_phone}</div>
+                                <div><strong>Speed:</strong> ${vehicle.speed.toFixed(1)} km/h</div>
+                                <div><strong>Stop Duration:</strong> ${vehicle.stop_duration} min</div>
+                                <div><strong>Fuel:</strong> ${vehicle.fuel_level.toFixed(1)}%</div>
+                                ${vehicle.gate_entry_logged ? '<div class="text-green-600 text-xs mt-2">✅ Gate entry logged</div>' : ''}
+                            </div>
+                        </div>
+                    `)
+                    .addTo(map);
+
+                vehicleMarkers[vehicle.vehicle_id] = marker;
+            });
+        }
+
+        // Scan vehicle at gate
+        async function scanVehicle() {
+            const vehicleId = document.getElementById('vehicle-scan-input').value.trim();
+            if (!vehicleId) {
+                alert('Please enter a vehicle ID');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/gate/scan/${vehicleId}`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Show scan result
+                    document.getElementById('scan-result').classList.remove('hidden');
+                    document.getElementById('detected-plate').textContent = data.gate_entry.number_plate;
+                    document.getElementById('detection-confidence').textContent = 
+                        `Confidence: ${(data.camera_data.confidence_score * 100).toFixed(1)}% | Quality: ${data.camera_data.image_quality}`;
+                    
+                    // Clear input
+                    document.getElementById('vehicle-scan-input').value = '';
+                    
+                    // Refresh data
+                    refreshData();
+                } else {
+                    alert('Vehicle not found or scan failed');
+                }
+            } catch (error) {
+                console.error('Error scanning vehicle:', error);
+                alert('Failed to scan vehicle');
+            }
+        }
+
+        // Show critical paging alert
+        function showPagingAlert(message) {
+            document.getElementById('paging-message').textContent = message;
+            document.getElementById('paging-alert').classList.remove('hidden');
+        }
+
+        // Dismiss paging alert
+        function dismissPagingAlert() {
+            document.getElementById('paging-alert').classList.add('hidden');
+        }
+
+        // Dismiss critical banner
+        function dismissCriticalBanner() {
+            document.getElementById('critical-banner').classList.add('hidden');
+        }
+
+        // Acknowledge critical incident
+        async function acknowledgeIncident(incidentId) {
+            try {
+                await fetch(`${API_BASE_URL}/api/v1/incidents/${incidentId}/acknowledge`, {
+                    method: 'POST'
+                });
+                refreshData();
+            } catch (error) {
+                console.error('Error acknowledging incident:', error);
+            }
+        }
+
+        // Refresh all data
+        function refreshData() {
+            loadData();
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'fixed top-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg z-50';
+            errorDiv.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">✕</button>
+                </div>
+            `;
+            document.body.appendChild(errorDiv);
+            
+            setTimeout(() => {
+                if (errorDiv.parentElement) {
+                    errorDiv.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
